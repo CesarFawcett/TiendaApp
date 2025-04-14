@@ -47,14 +47,6 @@ public class Producto {
     @Schema(description = "Categoría a la que pertenece el producto", example = "Granos")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categoria_id", nullable = false)
-    private Long categoria;
-
-    //Método para actualizar stock
-    public void reducirStock(Integer cantidad) {
-        if (cantidad > this.stock) {
-            throw new IllegalArgumentException("No hay suficiente stock disponible");
-        }
-        this.stock -= cantidad;
-    }
+    private Categoria categoria;
 
 }
