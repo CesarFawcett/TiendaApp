@@ -29,9 +29,10 @@ public class Cliente {
     @Column(nullable = false, length = 100)
     private String nombre;
 
-    @Schema(description = "nombre de correo", example = "AndresLeon@gmail.com")
+    @Schema(description = "Correo electrónico Gmail", example = "usuario@gmail.com")
+    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@gmail\\.com$", message = "Debe ser un correo electrónico válido de Gmail")
     @Column(nullable = false)
-    private String correo;
+    private String email;
 
     @Schema(description = "Teléfono de contacto", example = "+57 3101234567")
     @Pattern(regexp = "^\\+?[0-9\\s-]{10,}$", message = "Teléfono inválido")

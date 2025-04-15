@@ -1,6 +1,7 @@
 package edu.unimag.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,9 +30,10 @@ public class Usuario {
     @Schema(description = "Nombre completo del usuario", example = "Juan Pérez")
     private String nombre;
 
-    @Column(nullable = false, unique = true, length = 100)
-    @Schema(description = "Correo electrónico único", example = "juan@example.com")
-    private String correo;
+    @Schema(description = "Correo electrónico Gmail", example = "usuario@gmail.com")
+    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@gmail\\.com$", message = "Debe ser un correo electrónico válido de Gmail")
+    @Column(nullable = false)
+    private String email;
 
     @Column(nullable = false, length = 200)
     @Schema(description = "Contraseña encriptada", example = "$2a$10$xyz...")

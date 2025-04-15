@@ -2,9 +2,6 @@ package edu.unimag.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.math.BigDecimal;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -31,8 +28,8 @@ public class DetallesVenta{
     @Column(nullable = false)
     private Integer cantidad;
 
-    @Column(nullable = false, precision = 10, scale = 2)
-    @Schema(description = "Precio unitario al momento de la venta", example = "149.99")
+    @Column(nullable = false)
+    @Schema(description = "Precio unitario al momento de la venta", example = "149000")
     private Double precioUnitario;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -46,4 +43,5 @@ public class DetallesVenta{
     @Column(name = "subtotal", insertable = false, updatable = false)
     @Schema(description = "Subtotal calculado (cantidad * precio_unitario)", example = "1250000", accessMode = Schema.AccessMode.READ_ONLY)
     private Double subtotal;
+    
 }
