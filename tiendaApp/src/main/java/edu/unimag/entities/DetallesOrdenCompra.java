@@ -6,11 +6,13 @@ import lombok.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Representa los datellas de las compras a los proveedores .
+ *
+ * 
+ * 
  */
 
 @Entity
-@Table(name = "detalles_orden_compra")
+@Table(name = "detalles_orden_compras")
 @Setter
 @Getter
 @NoArgsConstructor
@@ -40,4 +42,9 @@ public class DetallesOrdenCompra {
     @Schema(description = "Precio unitario del producto al momento de la compra", example = "125000")
     @Positive(message = "El precio debe ser mayor a 0")
     private Double precioUnitario;
+
+    @Column(name = "subtotal", nullable = false, insertable = false, updatable = false)
+    @Schema(description = "Subtotal calculado (cantidad * precio_unitario)", example = "1250000", accessMode = Schema.AccessMode.READ_ONLY)
+    private Double subtotal;
+
 }

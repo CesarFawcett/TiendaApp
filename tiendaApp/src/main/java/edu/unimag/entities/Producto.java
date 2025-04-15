@@ -3,12 +3,15 @@ package edu.unimag.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Positive;
 import lombok.*;
+
+import java.time.LocalDate;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Representa un producto .
- * <p>
- * Contiene información de los productos.
+ *
+ * 
+ * 
  */
 
 @Entity
@@ -43,7 +46,10 @@ public class Producto {
     @Column(nullable = false)
     private Integer stock;
 
-    
+    @Schema(description = "Fecha de vencimiento ", example = "2025-04-15")
+    @Column(nullable = false)
+    private LocalDate fecha;
+
     @Schema(description = "Categoría a la que pertenece el producto", example = "Granos")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categoria_id", nullable = false)

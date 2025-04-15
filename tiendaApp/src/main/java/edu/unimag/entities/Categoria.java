@@ -5,9 +5,9 @@ import lombok.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Representa una categoría de productos en el sistema.
- * <p>
- * Permite organizar los productos.
+ *
+ * 
+ * 
  */
 
 @Entity
@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Schema(name = "Categoria", description = "Entidad que representa las categorías de productos en la tienda")
 public class Categoria {
 

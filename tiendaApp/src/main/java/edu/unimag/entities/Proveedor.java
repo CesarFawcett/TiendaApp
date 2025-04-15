@@ -7,9 +7,9 @@ import java.util.List;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Representa una categoría de productos en el sistema.
- * <p>
- * Permite organizar los productos.
+ *
+ * 
+ * 
  */
 
 @Entity
@@ -18,9 +18,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Schema(name = "Proveedor", description = "Entidad que representa los proveedores con los que se cuentan")
-
 public class Proveedor {
 
     @Id
@@ -41,6 +39,11 @@ public class Proveedor {
     @Column(nullable = false)
     private String telefono;
 
+    @Schema(description = "Correo electrónico Gmail", example = "usuario@gmail.com")
+    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@gmail\\.com$", message = "Debe ser un correo electrónico válido de Gmail")
+    @Column(nullable = false)
+    private String email;
+
     @Schema(description = "Dirección física del proveedor", example = "Calle 123 #45-67, Bogotá")
     @Column(nullable = false)
     private String direccion;
@@ -48,4 +51,5 @@ public class Proveedor {
     // Relación con órdenes de compra
     @OneToMany(mappedBy = "proveedor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrdenCompra> ordenesCompra;
+
 }

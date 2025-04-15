@@ -2,13 +2,18 @@ package edu.unimag.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Representa una orden de compra a proveedores.
+ *
+ * 
+ * 
  */
+
 @Entity
 @Table(name = "ordenes_compra")
 @Getter
@@ -27,6 +32,14 @@ public class OrdenCompra {
     @Column(nullable = false)
     private LocalDate fecha;
 
+    @Schema(description = "Estado de la orden", example = "PENDIENTE")
+    @Enumerated(EnumType.STRING)
+    private EstadoOrden estado;
+
+    @Schema(description = "Total de la compra", example = "299000")
+    @Column(nullable = false)
+    private BigDecimal total;
+
     // Relación con proveedor 
     @Schema(description = "Proveedor asociado a la orden")
     @ManyToOne
@@ -37,9 +50,5 @@ public class OrdenCompra {
     @Schema(description = "Lista de detalles de productos en la orden")
     @OneToMany(mappedBy = "ordenCompra", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetallesOrdenCompra> detalles;
-    
-    @Schema(description = "Estado de la orden", example = "PENDIENTE")
-    @Enumerated(EnumType.STRING)
-    private EstadoOrden estado;
 
 }
