@@ -6,9 +6,12 @@ import lombok.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- *
- * 
- * 
+ * Entidad que representa cada línea o ítem individual dentro de una orden de compra a proveedores.
+ * Contiene la información del producto solicitado, cantidad, precio unitario y permite
+ * calcular el subtotal de cada línea de la orden.
+ * NOTA:
+ * Esta entidad establece la relación muchos a uno con OrdenCompra y Producto, representando
+ * la composición detallada de cada orden de compra realizada a proveedores.
  */
 
 @Entity
@@ -17,34 +20,39 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(name = "DetallesOrdenCompra", description = "Entidad representante los detalles de las compras realizadas a proveedores")
+@Schema(name = "DetallesOrdenCompra", description = "Línea individual de producto dentro de una orden de compra a proveedor")
 public class DetallesOrdenCompra {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Schema(description = "ID único del detalle", example = "1")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Schema(description = "ID único del detalle de orden", example = "1")
     private Long id;
 
-    @Schema(description = "Orden de compra asociada a este detalle", example = "{\"id\": 1}")
+    @Schema(description = "Orden de compra a la que pertenece este detalle", example = "{\"id\": 1}")
     @ManyToOne
     @JoinColumn(name = "orden_compra_id", nullable = false)
     private OrdenCompra ordenCompra;
 
+    @Schema(description = "Producto específico solicitado en esta línea de la orden", example = "{\"id\": 3, \"nombre\": \"Leche en polvo\"}")
     @ManyToOne
     @JoinColumn(name = "producto_id", nullable = false)
-    @Schema(description = "Producto solicitado en la orden", example = "{\"id\": 3, \"nombre\": \"Leche en polvo\"}")
     private Producto producto;
 
-    @Schema(description = "Cantidad de unidades del producto", example = "10")
+    @Schema(description = "Cantidad de unidades solicitadas del producto", example = "10")
     @Positive(message = "La cantidad debe ser mayor a 0")
     private Integer cantidad;
 
-    @Schema(description = "Precio unitario del producto al momento de la compra", example = "125000")
+    @Schema(description = "Precio unitario negociado con el proveedor para este producto", example = "125000")
     @Positive(message = "El precio debe ser mayor a 0")
     private Double precioUnitario;
 
-    @Column(name = "subtotal", nullable = false, insertable = false, updatable = false)
-    @Schema(description = "Subtotal calculado (cantidad * precio_unitario)", example = "1250000", accessMode = Schema.AccessMode.READ_ONLY)
-    private Double subtotal;
+    @Transient
+    @Schema(description = "Valor subtotal calculado (cantidad × precioUnitario) para esta línea", example = "1250000")
+    public Double getSubtotal() {
+        if (cantidad != null && precioUnitario != null) {
+            return cantidad * precioUnitario;
+        }
+        return 0.0;
+    }
 
 }
