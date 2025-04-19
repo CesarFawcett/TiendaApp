@@ -43,9 +43,9 @@ public class Usuario {
     @Column(nullable = false, length = 60)  
     private String contraseña;
 
-    @Schema(description = "Rol que determina los permisos del usuario (ADMIN, VENDEDOR, ALMACEN, etc)", example = "ADMIN")
-    @Column(length = 20)
-    private String rol;
+    @Schema(description = "Rol que determina los permisos del usuario.)", example = "ADMINISTRADOR")
+    @Enumerated(EnumType.STRING)
+    private Rol rol;
 
     @Schema(description = "Historial de ventas registradas por este usuario")
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
