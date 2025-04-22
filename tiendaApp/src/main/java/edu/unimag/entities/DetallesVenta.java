@@ -23,7 +23,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class DetallesVenta{
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Schema(description = "ID único autogenerado del detalle de venta", example = "501")
     private Long id;
 

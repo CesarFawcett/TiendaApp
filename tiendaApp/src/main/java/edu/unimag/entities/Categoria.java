@@ -22,7 +22,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class Categoria {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Schema(description = "ID único autogenerado de la categoría", example = "1")
     private Long id;
 

@@ -28,7 +28,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class OrdenCompra {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Schema(description = "ID único de la orden de compra", example = "1")
     private Long id;
 

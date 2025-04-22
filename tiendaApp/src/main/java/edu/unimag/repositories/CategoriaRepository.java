@@ -15,5 +15,7 @@ import edu.unimag.entities.Categoria;
  */
 
 public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
+
+    boolean existsByNombre(String string);
     
 }

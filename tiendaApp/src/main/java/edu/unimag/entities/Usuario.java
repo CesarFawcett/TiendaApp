@@ -26,7 +26,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class Usuario {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Schema(description = "ID único autogenerado del usuario", example = "1")
     private Long id;
 

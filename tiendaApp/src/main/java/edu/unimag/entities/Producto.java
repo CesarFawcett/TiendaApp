@@ -30,7 +30,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class Producto {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Schema(description = "ID único autogenerado del producto", example = "1")
     private Long id;
 
@@ -59,7 +59,7 @@ public class Producto {
 
     @Schema(description = "Categoría a la que pertenece el producto para su clasificación", example = "Granos")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "categoria_id", nullable = false)
+    @JoinColumn(name = "categoria_id")
     private Categoria categoria;
 
 }
