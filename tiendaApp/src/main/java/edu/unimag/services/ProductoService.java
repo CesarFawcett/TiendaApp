@@ -8,7 +8,8 @@ import edu.unimag.entities.Producto;
 public interface ProductoService {
     
     List<Producto> findAll();
-    void delete(Long id);
     Producto create(Producto newProducto);
     Optional<Producto> findById(Long id);
+    Producto update(Long id, Producto newProducto);
+    void delete(Long id);
 }

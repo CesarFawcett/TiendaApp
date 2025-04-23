@@ -7,7 +7,8 @@ import edu.unimag.entities.Categoria;
 
 public interface CategoriaService {
     Categoria create (Categoria newCategoria);
-    void delete(Long id);
     List<Categoria> findAll();
     Optional<Categoria> findById(Long id);
+    Categoria update(Long id);
+    void delete(Long id);
 }

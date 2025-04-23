@@ -15,5 +15,5 @@ import edu.unimag.entities.Producto;
  */
 
 public interface ProductoRepository extends JpaRepository<Producto, Long>{
-    
+
 }

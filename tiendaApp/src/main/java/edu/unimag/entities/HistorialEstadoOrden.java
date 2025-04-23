@@ -56,4 +56,9 @@ public class HistorialEstadoOrden {
     @Schema(description = "Motivo o comentario explicativo sobre el cambio de estado", example = "Orden enviada al proveedor vía correo electrónico")
     @Column(length = 255)
     private String observacion;
+
+    public Long getOrdenCompraId() {
+        return this.getOrdenCompraId();  
+        
+    }
 }

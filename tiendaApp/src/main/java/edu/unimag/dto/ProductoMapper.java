@@ -36,15 +36,15 @@ public class ProductoMapper {
         }
         return productoDtos;
     }
-    public ProductoDto toProductoDto(ProductoDto productoDto2){
+    public ProductoDto toProductoDto(Producto createdProducto){
         ProductoDto productoDto = new ProductoDto();
-        productoDto.setId(productoDto2.getId());
-        productoDto.setNombre(productoDto2.getNombre());
-        productoDto.setDescripcion(productoDto2.getDescripcion());
-        productoDto.setPrecio(productoDto2.getPrecio());
-        productoDto.setStock(productoDto2.getStock());
-        productoDto.setFecha(productoDto2.getFecha());
-        productoDto.setCategoria(productoDto2.getCategoria());
+        productoDto.setId(createdProducto.getId());
+        productoDto.setNombre(createdProducto.getNombre());
+        productoDto.setDescripcion(createdProducto.getDescripcion());
+        productoDto.setPrecio(createdProducto.getPrecio());
+        productoDto.setStock(createdProducto.getStock());
+        productoDto.setFecha(createdProducto.getFecha());
+        productoDto.setCategoria(createdProducto.getCategoria());
         return productoDto;
     }
     public Producto toProductoDto(ProductoCreateDto productoDto) {
