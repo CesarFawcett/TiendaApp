@@ -6,7 +6,6 @@ import java.time.format.DateTimeFormatter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import edu.unimag.dto.ProductoMapper;
-import edu.unimag.dto.CategoriaDto;
 import edu.unimag.dto.ProductoCreateDto;
 import edu.unimag.dto.ProductoDto;
 import edu.unimag.entities.Categoria;
