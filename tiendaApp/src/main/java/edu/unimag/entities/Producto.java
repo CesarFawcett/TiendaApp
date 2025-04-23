@@ -58,7 +58,7 @@ public class Producto {
     private LocalDate fecha;
 
     @Schema(description = "Categoría a la que pertenece el producto para su clasificación", example = "Granos")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "categoria_id")
     private Categoria categoria;
 

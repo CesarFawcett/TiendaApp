@@ -1,27 +1,26 @@
 package edu.unimag.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import edu.unimag.entities.Categoria;
-import edu.unimag.repositories.CategoriaRepository;
+import edu.unimag.services.CategoriaService;
 import jakarta.annotation.PostConstruct;
 
 @RestController
 @RequestMapping("/categoria")
 public class CategoriaController {
-    
-    @Autowired
-private CategoriaRepository categoriaRepository;
+    private final CategoriaService categoriaService;
 
-@PostConstruct 
-public void crearCategoriaDePrueba() {
-    if (!categoriaRepository.existsByNombre("Granos")) {
-        Categoria categoria = new Categoria();
-        categoria.setNombre("Granos");
-        categoria.setDescripcion("Productos como arroz, frijoles, lentejas y similares");
-        categoriaRepository.save(categoria);
-        System.out.println("✅ Categoría de prueba creada");
+    public CategoriaController(CategoriaService categoriaService){
+
+        this.categoriaService = categoriaService;
     }
-}
+
+    @PostConstruct
+    public void initSampleCategoria(){
+       
+        Categoria categoria1 = new Categoria();
+        categoria1.setNombre("Tubérculo");
+        categoria1.setDescripcion("Carbohidratos complejos");
+        categoriaService.create(categoria1);
+    }
 }

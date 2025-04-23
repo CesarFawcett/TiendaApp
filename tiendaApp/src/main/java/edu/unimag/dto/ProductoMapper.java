@@ -8,14 +8,15 @@ import edu.unimag.entities.Producto;
 
 @Component
 public class ProductoMapper {
-    public ProductoCreateDto toProductoCreateDto(Producto producto){
+    public ProductoCreateDto toProductoCreateDto(Producto productoCreated){
         ProductoCreateDto productoCreateDto = new ProductoCreateDto();
-        productoCreateDto.setNombre(producto.getNombre());
-        productoCreateDto.setDescripcion(producto.getDescripcion());
-        productoCreateDto.setPrecio(producto.getPrecio());
-        productoCreateDto.setStock(producto.getStock());
-        productoCreateDto.setFecha(producto.getFecha());
-        productoCreateDto.setCategoria(producto.getCategoria());
+        productoCreateDto.setId(productoCreated.getId());
+        productoCreateDto.setNombre(productoCreated.getNombre());
+        productoCreateDto.setDescripcion(productoCreated.getDescripcion());
+        productoCreateDto.setPrecio(productoCreated.getPrecio());
+        productoCreateDto.setStock(productoCreated.getStock());
+        productoCreateDto.setFecha(productoCreated.getFecha());
+        productoCreateDto.setCategoria(productoCreated.getCategoria());
         return productoCreateDto;
     }
     public static List<ProductoDto> toDtoList(List<Producto> productos){
@@ -23,6 +24,7 @@ public class ProductoMapper {
         for (Producto producto : productos){
             ProductoDto productoDto = new ProductoDto();
 
+            productoDto.setId(producto.getId());
             productoDto.setNombre(producto.getNombre());
             productoDto.setDescripcion(producto.getDescripcion());
             productoDto.setPrecio(producto.getPrecio());
@@ -34,14 +36,25 @@ public class ProductoMapper {
         }
         return productoDtos;
     }
-    public ProductoDto toProductoDto(Producto producto){
+    public ProductoDto toProductoDto(ProductoDto productoDto2){
         ProductoDto productoDto = new ProductoDto();
-        productoDto.setNombre(producto.getNombre());
-        productoDto.setDescripcion(producto.getDescripcion());
-        productoDto.setPrecio(producto.getPrecio());
-        productoDto.setStock(producto.getStock());
-        productoDto.setFecha(producto.getFecha());
-        productoDto.setCategoria(producto.getCategoria());
+        productoDto.setId(productoDto2.getId());
+        productoDto.setNombre(productoDto2.getNombre());
+        productoDto.setDescripcion(productoDto2.getDescripcion());
+        productoDto.setPrecio(productoDto2.getPrecio());
+        productoDto.setStock(productoDto2.getStock());
+        productoDto.setFecha(productoDto2.getFecha());
+        productoDto.setCategoria(productoDto2.getCategoria());
         return productoDto;
     }
+    public Producto toProductoDto(ProductoCreateDto productoDto) {
+        Producto producto = new Producto();
+        producto.setNombre(productoDto.getNombre());
+        producto.setDescripcion(productoDto.getDescripcion());
+        producto.setPrecio(productoDto.getPrecio());
+        producto.setStock(productoDto.getStock());
+        producto.setFecha(productoDto.getFecha());
+        producto.setCategoria(productoDto.getCategoria());
+        return producto;
+       }
 }
