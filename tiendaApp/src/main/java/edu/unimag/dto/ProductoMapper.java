@@ -19,7 +19,7 @@ public class ProductoMapper {
         productoCreateDto.setCategoria(productoCreated.getCategoria());
         return productoCreateDto;
     }
-    public static List<ProductoDto> toDtoList(List<Producto> productos){
+    public List<ProductoDto> toDtoList(List<Producto> productos){
         List<ProductoDto> productoDtos = new ArrayList<>();
         for (Producto producto : productos){
             ProductoDto productoDto = new ProductoDto();
