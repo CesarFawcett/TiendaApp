@@ -30,19 +30,19 @@ public class ProductoServiceImpl implements ProductoService {
     }
 
     @Override
-    public Producto update(Long id, Producto newProducto) {
-       Optional<Producto> existingProducto = productoRepository.findById(id);
-       if (existingProducto.isPresent()) {
-           Producto productoToUpdate = existingProducto.get();
-           productoToUpdate.setNombre(newProducto.getNombre());
-           productoToUpdate.setDescripcion(newProducto.getDescripcion());
-           productoToUpdate.setPrecio(newProducto.getPrecio());
-           productoToUpdate.setStock(newProducto.getStock());
-           productoToUpdate.setFecha(newProducto.getFecha());
-           productoToUpdate.setCategoria(newProducto.getCategoria());
-        return productoRepository.save(productoToUpdate); 
+    public Producto update(Long id, Producto newProducto) { 
+    Optional<Producto> existingProducto = productoRepository.findById(id);
+    if (existingProducto.isPresent()) {
+        Producto productoToUpdate = existingProducto.get();
+        productoToUpdate.setNombre(newProducto.getNombre()); 
+        productoToUpdate.setDescripcion(newProducto.getDescripcion());
+        productoToUpdate.setPrecio(newProducto.getPrecio());
+        productoToUpdate.setStock(newProducto.getStock());
+        productoToUpdate.setFecha(newProducto.getFecha());
+        productoToUpdate.setCategoria(newProducto.getCategoria());
+        return productoRepository.save(productoToUpdate);
     } else {
-        return null;  
+        return null;
     }
 }
 

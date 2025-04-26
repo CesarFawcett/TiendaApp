@@ -10,9 +10,12 @@ import edu.unimag.dto.ProductoCreateDto;
 import edu.unimag.dto.ProductoDto;
 import edu.unimag.entities.Categoria;
 import edu.unimag.entities.Producto;
+import edu.unimag.exception.EntidadNoEncontradaException;
 import edu.unimag.services.CategoriaService;
 import edu.unimag.services.ProductoService;
 import jakarta.annotation.PostConstruct;
+import jakarta.validation.Valid;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -52,10 +55,11 @@ public class ProductoController {
 
     // Crear nuevo producto
     @PostMapping
-    public ProductoDto createProducto(@RequestBody ProductoCreateDto productoCreateDto) {
+    public ResponseEntity<ProductoDto> createProducto(@RequestBody ProductoCreateDto productoCreateDto) {
         Producto producto = productoMapper.toProductoDto(productoCreateDto);
         Producto createdProducto = productoService.create(producto);
-        return productoMapper.toProductoDto(createdProducto);
+        ProductoDto productoDto = productoMapper.toProductoDto(createdProducto);
+        return ResponseEntity.ok(productoDto);
     }
 
     // Obtener todos los productos
@@ -68,23 +72,28 @@ public class ProductoController {
 
     // Obtener producto por ID
     @GetMapping("/{id}")
-    public ProductoDto getProductoById(@PathVariable Long id) {
+    public ResponseEntity<ProductoDto> getProductoById(@PathVariable Long id) {
         Optional<Producto> producto = productoService.findById(id);
         if (producto.isPresent()) {
-            return productoMapper.toProductoDto(producto.get());
+            ProductoDto productoDto = productoMapper.toProductoDto(producto.get());
+            return ResponseEntity.ok(productoDto);
+        }else{
+            return ResponseEntity.notFound().build();
         }
-        return null;
     }
 
     // Actualizar producto
     @PutMapping("/{id}")
-    public ProductoDto updateProducto(@PathVariable Long id, @RequestBody ProductoCreateDto productoCreateDto) {
-        Producto producto = productoMapper.toProductoDto(productoCreateDto);
-        Producto updatedProducto = productoService.update(id, producto);
-        if (updatedProducto != null) {
-            return productoMapper.toProductoDto(updatedProducto);
+     public ResponseEntity<ProductoDto> updateProducto(@PathVariable Long id,@Valid @RequestBody ProductoCreateDto productoCreateDto) {
+        Producto producto = productoMapper.toProductoDto(productoCreateDto); // Map DTO to Entity
+        try {
+            Producto updatedProducto = productoService.update(id, producto); // Call service with entity
+            return ResponseEntity.ok(productoMapper.toProductoDto(updatedProducto)); // Map updated entity to DTO and return
+        } catch (EntidadNoEncontradaException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null); // Or return a more specific error DTO
         }
-        return null; 
     }
 
     // Eliminar producto

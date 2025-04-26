@@ -4,6 +4,7 @@ import edu.unimag.dto.CategoriaDto;
 import edu.unimag.dto.CategoriaCreateDto;
 import edu.unimag.dto.CategoriaMapper;
 import edu.unimag.entities.Categoria;
+import edu.unimag.exception.EntidadNoEncontradaException;
 import edu.unimag.services.CategoriaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -64,12 +65,15 @@ public class CategoriaController {
     // Actualizar categoría
     @PutMapping("/{id}")
     public ResponseEntity<CategoriaDto> updateCategoria(@PathVariable Long id, @RequestBody CategoriaCreateDto categoriaCreateDto) {
-        Categoria updatedCategoria = categoriaService.update(id);
-        if (updatedCategoria != null) {
-            CategoriaDto categoriaDto = categoriaMapper.toCategoriaDto(updatedCategoria);
-            return ResponseEntity.ok(categoriaDto);
-        } else {
-            return ResponseEntity.notFound().build();
+        Categoria categoria = categoriaMapper.toCategoriaDto(categoriaCreateDto);
+        try {
+        Categoria updatedCategoria = categoriaService.update(id, categoria);
+        return ResponseEntity.ok(categoriaMapper.toCategoriaDto(updatedCategoria));
+        } catch (EntidadNoEncontradaException e){
+          return ResponseEntity.notFound().build();
+            
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
         }
     }
 

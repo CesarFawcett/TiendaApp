@@ -9,11 +9,11 @@ import java.util.List;
 @Component
 public class CategoriaMapper {
     
-    public CategoriaDto toCategoriaDto(Categoria categoria) {
+    public CategoriaDto toCategoriaDto(Categoria categoriaCreateDto) {
         CategoriaDto categoriaDto = new CategoriaDto();
-        categoriaDto.setId(categoria.getId());
-        categoriaDto.setNombre(categoria.getNombre());
-        categoriaDto.setDescripcion(categoria.getDescripcion());
+        categoriaDto.setId(categoriaCreateDto.getId());
+        categoriaDto.setNombre(categoriaCreateDto.getNombre());
+        categoriaDto.setDescripcion(categoriaCreateDto.getDescripcion());
         return categoriaDto;
     }
     
@@ -30,5 +30,12 @@ public class CategoriaMapper {
             categoriaDtos.add(toCategoriaDto(categoria));
         }
         return categoriaDtos;
+    }
+
+    public Categoria toCategoriaDto(CategoriaCreateDto categoriaCreateDto) {
+        Categoria categoria = new Categoria();
+        categoria.setNombre(categoriaCreateDto.getNombre());
+        categoria.setDescripcion(categoriaCreateDto.getDescripcion());
+        return categoria;
     }
 }

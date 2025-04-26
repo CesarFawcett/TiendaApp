@@ -30,11 +30,11 @@ public class CategoriaServiceImpl implements CategoriaService {
       }
 
     @Override
-    public Categoria update(Long id) {
+    public Categoria update(Long id, Categoria newCategoria) {
         Optional<Categoria> existingCategoria = categoriaRepository.findById(id);
           if (existingCategoria.isPresent()) {
               Categoria categoriaToUpdate = existingCategoria.get();
-              categoriaToUpdate.setNombre("Nuevo nombre");
+              categoriaToUpdate.setNombre(newCategoria.getNombre());
               return categoriaRepository.save(categoriaToUpdate);
           } else {
               return null;  

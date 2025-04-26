@@ -9,6 +9,6 @@ public interface CategoriaService {
     Categoria create (Categoria newCategoria);
     List<Categoria> findAll();
     Optional<Categoria> findById(Long id);
-    Categoria update(Long id);
+    Categoria update(Long id,Categoria newCategoria);
     void delete(Long id);
 }
