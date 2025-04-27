@@ -6,12 +6,12 @@ import edu.unimag.dto.CategoriaMapper;
 import edu.unimag.entities.Categoria;
 import edu.unimag.exception.EntidadNoEncontradaException;
 import edu.unimag.services.CategoriaService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.server.ResponseStatusException;
 import jakarta.annotation.PostConstruct;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/categoria")
@@ -39,7 +39,7 @@ public class CategoriaController {
         Categoria categoria = categoriaMapper.toCategoria(categoriaCreateDto);
         Categoria createdCategoria = categoriaService.create(categoria);
         CategoriaDto categoriaDto = categoriaMapper.toCategoriaDto(createdCategoria);
-        return ResponseEntity.ok(categoriaDto);
+        return new ResponseEntity<>(categoriaDto, HttpStatus.CREATED); 
     }
 
     // Obtener todas las categorías
@@ -53,35 +53,30 @@ public class CategoriaController {
     // Obtener una categoría por ID
     @GetMapping("/{id}")
     public ResponseEntity<CategoriaDto> getCategoriaById(@PathVariable Long id) {
-        Optional<Categoria> categoria = categoriaService.findById(id);
-        if (categoria.isPresent()) {
-            CategoriaDto categoriaDto = categoriaMapper.toCategoriaDto(categoria.get());
-            return ResponseEntity.ok(categoriaDto);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return categoriaService.findById(id)
+                .map(categoriaMapper::toCategoriaDto)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoría no encontrada"));
     }
 
     // Actualizar categoría
     @PutMapping("/{id}")
     public ResponseEntity<CategoriaDto> updateCategoria(@PathVariable Long id, @RequestBody CategoriaCreateDto categoriaCreateDto) {
-        Categoria categoria = categoriaMapper.toCategoriaDto(categoriaCreateDto);
         try {
-        Categoria updatedCategoria = categoriaService.update(id, categoria);
-        return ResponseEntity.ok(categoriaMapper.toCategoriaDto(updatedCategoria));
-        } catch (EntidadNoEncontradaException e){
-          return ResponseEntity.notFound().build();
-            
+            Categoria categoria = categoriaMapper.toCategoria(categoriaCreateDto);
+            Categoria updatedCategoria = categoriaService.update(id, categoria);
+            return ResponseEntity.ok(categoriaMapper.toCategoriaDto(updatedCategoria));
+        } catch (EntidadNoEncontradaException e) {
+            return ResponseEntity.notFound().build();
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().build(); 
         }
     }
 
     // Eliminar categoría
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") Long id){
+    public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
         categoriaService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }
-

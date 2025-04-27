@@ -1,9 +1,12 @@
 package edu.unimag.dto;
 
 import java.time.LocalDate;
-import edu.unimag.entities.Categoria;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 public class ProductoDto {
     private Long id;
@@ -12,7 +15,5 @@ public class ProductoDto {
     private Double precio;
     private Integer stock;
     private LocalDate fecha;
-    private Categoria categoria;
- 
 }
 

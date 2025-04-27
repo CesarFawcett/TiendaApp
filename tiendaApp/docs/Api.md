@@ -15,13 +15,12 @@
 
 ## Crear Producto (`/`)
 {
-  "nombre": "Azúcar refinada",
-  "descripcion": "Azúcar blanca en paquete de 1kg",
-  "precio": 5000.00,
-  "stock": 30,
-  "categoria": {
-    "id": 2  // (ej: "Granos")
-  }
+  "nombre": "Manzanas Gala",
+  "descripcion": "Manzanas rojas dulces y jugosas",
+  "precio": 1.99,
+  "stock": 100,
+  "fecha": "2025-05-10",
+  "categoriaId": 1  
 }
 
 ## Crear Categoria (`/`)
