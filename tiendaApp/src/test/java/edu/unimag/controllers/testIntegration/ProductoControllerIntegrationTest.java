@@ -1,7 +1,5 @@
-package edu.unimag.controllers;
-
+package edu.unimag.controllers.testIntegration;
 import edu.unimag.dto.ProductoCreateDto;
-import edu.unimag.dto.ProductoDto;
 import edu.unimag.entities.Producto;
 import edu.unimag.entities.Categoria;
 import edu.unimag.repositories.ProductoRepository;

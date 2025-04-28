@@ -1,6 +1,7 @@
-package edu.unimag.controllers;
+package edu.unimag.controllers.testUnit;
 
 import edu.unimag.dto.CategoriaDto;
+import edu.unimag.controllers.CategoriaController;
 import edu.unimag.dto.CategoriaCreateDto;
 import edu.unimag.dto.CategoriaMapper;
 import edu.unimag.entities.Categoria;

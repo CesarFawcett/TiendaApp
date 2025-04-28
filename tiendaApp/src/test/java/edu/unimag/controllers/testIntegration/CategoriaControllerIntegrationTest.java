@@ -1,4 +1,4 @@
-package edu.unimag.controllers;
+package edu.unimag.controllers.testIntegration;
 
 import edu.unimag.dto.CategoriaCreateDto;
 import edu.unimag.entities.Categoria;

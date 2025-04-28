@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import edu.unimag.entities.Proveedor;
 
-public interface ProveedoresService {
+public interface ProveedorService {
     
     List<Proveedor> findAll();
     Proveedor create (Proveedor newProveedor);

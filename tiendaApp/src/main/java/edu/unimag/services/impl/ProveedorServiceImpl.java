@@ -6,10 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import edu.unimag.entities.Proveedor;
 import edu.unimag.repositories.ProveedorRepository;
-import edu.unimag.services.ProveedoresService;
+import edu.unimag.services.ProveedorService;
 
 @Service
-public class ProveedoresServiceImpl implements ProveedoresService {
+public class ProveedorServiceImpl implements ProveedorService {
 
     @Autowired
     private ProveedorRepository proveedorRepository;
