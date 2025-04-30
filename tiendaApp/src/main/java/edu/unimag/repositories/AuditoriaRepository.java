@@ -14,6 +14,6 @@ import edu.unimag.entities.Auditoria;
  * @see Auditoria
  */
 
-public interface AuditorRepository extends JpaRepository<Auditoria, Long> {
+public interface AuditoriaRepository extends JpaRepository<Auditoria, Long> {
     
 }
