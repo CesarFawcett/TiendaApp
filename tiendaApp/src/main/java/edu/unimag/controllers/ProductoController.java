@@ -37,7 +37,7 @@ public class ProductoController {
         productoCreateDto.setNombre("papa criolla");
         productoCreateDto.setDescripcion("también llamada papa amarilla");
         productoCreateDto.setPrecio(20.5);
-        productoCreateDto.setFecha(java.time.LocalDate.of(2025, 4, 29));
+        productoCreateDto.setFecha(java.time.LocalDate.of(2025, 10, 29));
         productoCreateDto.setStock(20);
         Producto producto = productoMapper.toProducto(productoCreateDto);
         producto.setCategoria(categoria); 

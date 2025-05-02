@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import edu.unimag.dto.DetallesVentaCreateDto;
 import edu.unimag.entities.DetallesVenta;
@@ -15,6 +16,7 @@ import edu.unimag.repositories.ProductoRepository;
 import edu.unimag.repositories.VentaRepository;
 import edu.unimag.services.VentaService;
 
+@Service
 public class VentaServiceImpl implements VentaService {
 
     @Autowired
