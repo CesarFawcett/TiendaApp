@@ -28,7 +28,7 @@ public class ProductoServiceImpl implements ProductoService {
     public Optional<Producto> findById(Long id) {
       return productoRepository.findById(id);
     }
-
+    
     @Override
     public Producto update(Long id, Producto newProducto) { 
     Optional<Producto> existingProducto = productoRepository.findById(id);

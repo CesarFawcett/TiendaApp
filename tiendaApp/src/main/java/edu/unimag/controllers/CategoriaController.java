@@ -33,7 +33,7 @@ public class CategoriaController {
         categoriaService.create(categoria1);
     }
 
-    // Crear nueva categoría
+    //Crear nueva categoría
     @PostMapping
     public ResponseEntity<CategoriaDto> createCategoria(@RequestBody CategoriaCreateDto categoriaCreateDto) {
         Categoria categoria = categoriaMapper.toCategoria(categoriaCreateDto);
@@ -42,7 +42,7 @@ public class CategoriaController {
         return new ResponseEntity<>(categoriaDto, HttpStatus.CREATED); 
     }
 
-    // Obtener todas las categorías
+    //Obtener todas las categorías
     @GetMapping
     public ResponseEntity<List<CategoriaDto>> getAllCategorias() {
         List<Categoria> categorias = categoriaService.findAll();
@@ -50,7 +50,7 @@ public class CategoriaController {
         return ResponseEntity.ok(categoriaDtos);
     }
 
-    // Obtener una categoría por ID
+    //Obtener una categoría por ID
     @GetMapping("/{id}")
     public ResponseEntity<CategoriaDto> getCategoriaById(@PathVariable Long id) {
         return categoriaService.findById(id)
@@ -59,7 +59,7 @@ public class CategoriaController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoría no encontrada"));
     }
 
-    // Actualizar categoría
+    //Actualizar categoría
     @PutMapping("/{id}")
     public ResponseEntity<CategoriaDto> updateCategoria(@PathVariable Long id, @RequestBody CategoriaCreateDto categoriaCreateDto) {
         try {
@@ -73,7 +73,7 @@ public class CategoriaController {
         }
     }
 
-    // Eliminar categoría
+    //Eliminar categoría
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
         categoriaService.delete(id);

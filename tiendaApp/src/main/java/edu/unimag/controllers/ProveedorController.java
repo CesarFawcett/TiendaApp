@@ -25,7 +25,7 @@ public class ProveedorController {
         this.proveedorMapper = proveedorMapper;
     }
 
-    // Crear un nuevo proveedor
+    //Crear un nuevo proveedor
     @PostMapping
     public ResponseEntity<ProveedorDto> createProveedor(@Valid @RequestBody ProveedorCreateDto proveedorCreateDto) {
         Proveedor proveedor = proveedorMapper.toProveedor(proveedorCreateDto);
@@ -34,7 +34,7 @@ public class ProveedorController {
         return new ResponseEntity<>(proveedorDto, HttpStatus.CREATED);
     }
 
-    // Obtener todos los proveedores
+    //Obtener todos los proveedores
     @GetMapping
     public ResponseEntity<List<ProveedorDto>> getAllProveedores() {
         List<Proveedor> proveedores = proveedorService.findAll();
@@ -42,7 +42,7 @@ public class ProveedorController {
         return ResponseEntity.ok(proveedorDtos);
     }
 
-    // Obtener un proveedor por ID
+    //Obtener un proveedor por ID
     @GetMapping("/{id}")
     public ResponseEntity<ProveedorDto> getProveedorById(@PathVariable Long id) {
         Optional<Proveedor> proveedor = proveedorService.findById(id);
@@ -54,7 +54,7 @@ public class ProveedorController {
         }
     }
 
-    // Actualizar un proveedor
+    //Actualizar un proveedor
     @PutMapping("/{id}")
     public ResponseEntity<ProveedorDto> updateProveedor(@PathVariable Long id, @Valid @RequestBody ProveedorCreateDto proveedorCreateDto) {
         Proveedor proveedor = proveedorMapper.toProveedor(proveedorCreateDto);
@@ -69,7 +69,7 @@ public class ProveedorController {
         }
     }
 
-    // Eliminar un proveedor
+    //Eliminar un proveedor
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProveedor(@PathVariable Long id) {
         proveedorService.delete(id);

@@ -29,23 +29,21 @@ public class OrdenCompraController {
         this.ordenCompraMapper = ordenCompraMapper;
     }
 
-    //  Crear una nueva orden de compra
+    //Crear una nueva orden de compra
     @PostMapping
     public ResponseEntity<OrdenCompraDto> createOrdenCompra(@Valid @RequestBody OrdenCompraCreateDto ordenCompraCreateDto) {
-        //  Primero, busca al proveedor para asegurarte de que existe
         Optional<Proveedor> proveedor = proveedorService.findById(ordenCompraCreateDto.getProveedorId());
         if (proveedor.isEmpty()) {
             throw new EntidadNoEncontradaException("Proveedor", ordenCompraCreateDto.getProveedorId());
         }
-
         OrdenCompra ordenCompra = ordenCompraMapper.toOrdenCompra(ordenCompraCreateDto);
-        ordenCompra.setProveedor(proveedor.get());  //  Asocia el proveedor a la orden
+        ordenCompra.setProveedor(proveedor.get()); 
         OrdenCompra createdOrdenCompra = ordenCompraService.create(ordenCompra);
         OrdenCompraDto ordenCompraDto = ordenCompraMapper.toOrdenCompraDto(createdOrdenCompra);
         return new ResponseEntity<>(ordenCompraDto, HttpStatus.CREATED);
     }
 
-    //  Obtener todas las órdenes de compra
+    //Obtener todas las órdenes de compra
     @GetMapping
     public ResponseEntity<List<OrdenCompraDto>> getAllOrdenesCompra() {
         List<OrdenCompra> ordenesCompra = ordenCompraService.findAll();
@@ -53,7 +51,7 @@ public class OrdenCompraController {
         return ResponseEntity.ok(ordenCompraDtos);
     }
 
-    //  Obtener una orden de compra por ID
+    //Obtener una orden de compra por ID
     @GetMapping("/{id}")
     public ResponseEntity<OrdenCompraDto> getOrdenCompraById(@PathVariable Long id) {
         Optional<OrdenCompra> ordenCompra = ordenCompraService.findById(id);
@@ -65,7 +63,7 @@ public class OrdenCompraController {
         }
     }
 
-    //  Actualizar una orden de compra
+    //Actualizar una orden de compra
     @PutMapping("/{id}")
     public ResponseEntity<OrdenCompraDto> updateOrdenCompra(@PathVariable Long id, @Valid @RequestBody OrdenCompraCreateDto ordenCompraCreateDto) {
         //  Primero, busca al proveedor para asegurarte de que existe
@@ -87,7 +85,7 @@ public class OrdenCompraController {
         }
     }
 
-    //  Eliminar una orden de compra
+    //Eliminar una orden de compra
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteOrdenCompra(@PathVariable Long id) {
         ordenCompraService.delete(id);

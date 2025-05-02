@@ -31,10 +31,8 @@ public class ProductoController {
 
     @PostConstruct
     public void initSampleProducto() {
-        // Obtener la categoría (asegúrate de que la categoría con ID 1 exista)
         var categoria = categoriaService.findById(1L)
                 .orElseThrow(() -> new RuntimeException("Categoría con ID 1 no encontrada"));
-
         ProductoCreateDto productoCreateDto = new ProductoCreateDto();
         productoCreateDto.setNombre("papa criolla");
         productoCreateDto.setDescripcion("también llamada papa amarilla");
@@ -48,21 +46,22 @@ public class ProductoController {
 
     @PostMapping
     public ResponseEntity<ProductoDto> createProducto(@Valid @RequestBody ProductoCreateDto productoCreateDto) {
-        // Obtener la categoría
         var categoria = categoriaService.findById(productoCreateDto.getCategoriaId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Categoría no encontrada"));
         Producto producto = productoMapper.toProducto(productoCreateDto);
-        producto.setCategoria(categoria); // Asignar la categoría
+        producto.setCategoria(categoria); 
         Producto createdProducto = productoService.create(producto);
         return new ResponseEntity<>(productoMapper.toProductoDto(createdProducto), HttpStatus.CREATED);
     }
 
+    //Obtener todos los productos
     @GetMapping
     public ResponseEntity<List<ProductoDto>> getAllProductos() {
         List<Producto> productos = productoService.findAll();
         return ResponseEntity.ok(productoMapper.toDtoList(productos));
     }
 
+    //Obtener un producto por ID
     @GetMapping("/{id}")
     public ResponseEntity<ProductoDto> getProductoById(@PathVariable Long id) {
         return productoService.findById(id)
@@ -71,9 +70,9 @@ public class ProductoController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado"));
     }
 
+    //Actualizar producto
     @PutMapping("/{id}")
     public ResponseEntity<ProductoDto> updateProducto(@PathVariable Long id, @Valid @RequestBody ProductoCreateDto productoCreateDto) {
-        // Obtener la categoría
         var categoria = categoriaService.findById(productoCreateDto.getCategoriaId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Categoría no encontrada"));
         try {
@@ -88,6 +87,7 @@ public class ProductoController {
         }
     }
 
+    //Eliminar producto
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProducto(@PathVariable Long id) {
         productoService.delete(id);

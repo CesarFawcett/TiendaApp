@@ -7,7 +7,7 @@ import edu.unimag.entities.Usuario;
 public interface UsuarioService {
     List<Usuario> findAll();
     Usuario create(Usuario newUsuario);
-    Optional<Usuario> finById(Long id);
+    Optional<Usuario> findById(Long id);
     Usuario update(Long id, Usuario newUsuario);
     void delete(Long id);
 }
