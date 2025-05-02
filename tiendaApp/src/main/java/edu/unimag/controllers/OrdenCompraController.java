@@ -1,11 +1,13 @@
 package edu.unimag.controllers;
 
-import edu.unimag.dto.OrdenCompraDto;
-import edu.unimag.dto.OrdenCompraCreateDto;
-import edu.unimag.dto.OrdenCompraMapper;
+import edu.unimag.dto.*;
+import edu.unimag.entities.DetallesOrdenCompra;
+import edu.unimag.entities.EstadoOrden;
 import edu.unimag.entities.OrdenCompra;
+import edu.unimag.entities.Producto;
 import edu.unimag.entities.Proveedor;
 import edu.unimag.exception.EntidadNoEncontradaException;
+import edu.unimag.services.DetallesOrdenCompraService;
 import edu.unimag.services.OrdenCompraService;
 import edu.unimag.services.ProveedorService;
 import org.springframework.http.HttpStatus;
@@ -22,25 +24,52 @@ public class OrdenCompraController {
     private final OrdenCompraService ordenCompraService;
     private final ProveedorService proveedorService;
     private final OrdenCompraMapper ordenCompraMapper;
-
-    public OrdenCompraController(OrdenCompraService ordenCompraService, ProveedorService proveedorService, OrdenCompraMapper ordenCompraMapper) {
+    private final DetallesOrdenCompraMapper detallesOrdenCompraMapper;
+    
+    public OrdenCompraController(OrdenCompraService ordenCompraService, ProveedorService proveedorService, OrdenCompraMapper ordenCompraMapper, DetallesOrdenCompraMapper detallesOrdenCompraMapper) {
         this.ordenCompraService = ordenCompraService;
         this.proveedorService = proveedorService;
         this.ordenCompraMapper = ordenCompraMapper;
+        this.detallesOrdenCompraMapper = detallesOrdenCompraMapper;
     }
 
     //Crear una nueva orden de compra
     @PostMapping
-    public ResponseEntity<OrdenCompraDto> createOrdenCompra(@Valid @RequestBody OrdenCompraCreateDto ordenCompraCreateDto) {
-        Optional<Proveedor> proveedor = proveedorService.findById(ordenCompraCreateDto.getProveedorId());
-        if (proveedor.isEmpty()) {
-            throw new EntidadNoEncontradaException("Proveedor", ordenCompraCreateDto.getProveedorId());
-        }
-        OrdenCompra ordenCompra = ordenCompraMapper.toOrdenCompra(ordenCompraCreateDto);
-        ordenCompra.setProveedor(proveedor.get()); 
-        OrdenCompra createdOrdenCompra = ordenCompraService.create(ordenCompra);
-        OrdenCompraDto ordenCompraDto = ordenCompraMapper.toOrdenCompraDto(createdOrdenCompra);
-        return new ResponseEntity<>(ordenCompraDto, HttpStatus.CREATED);
+    public ResponseEntity<OrdenCompraDto> create(@Valid @RequestBody OrdenCompraCreateDto dto) {
+        Proveedor proveedor = proveedorService.findById(dto.getProveedorId())
+                .orElseThrow(() -> new EntidadNoEncontradaException("Proveedor", dto.getProveedorId()));
+
+        OrdenCompra ordenCompra = ordenCompraMapper.toOrdenCompra(dto);
+        ordenCompra.setProveedor(proveedor);
+        OrdenCompra created = ordenCompraService.create(ordenCompra);
+        
+        return ResponseEntity.status(HttpStatus.CREATED).body(ordenCompraMapper.toOrdenCompraDto(created));
+    }
+
+    // Agregar detalle a orden de compra
+    @PostMapping("/{id}/detalles")
+    public ResponseEntity<DetallesOrdenCompraDto> addDetalle(@PathVariable Long id, 
+                                                         @Valid @RequestBody DetallesOrdenCompraCreateDto dto) {
+    OrdenCompra ordenCompra = ordenCompraService.addDetalle(id, dto);
+    DetallesOrdenCompra nuevoDetalle = ordenCompra.getDetalles()
+                                       .get(ordenCompra.getDetalles().size() - 1);
+
+    return ResponseEntity.status(HttpStatus.CREATED)
+            .body(detallesOrdenCompraMapper.toDetallesOrdenCompraDto(nuevoDetalle));
+    }
+
+    // Cambiar estado de una orden
+    @PatchMapping("/{id}/estado")
+    public ResponseEntity<Void> cambiarEstado(@PathVariable Long id, @RequestParam EstadoOrden nuevoEstado) {
+    ordenCompraService.cambiarEstado(id, nuevoEstado, null, "Cambio manual vía API");
+    return ResponseEntity.noContent().build();
+    }
+
+    // Obtener detalles de una orden de compra
+    @GetMapping("/{id}/detalles")
+    public ResponseEntity<List<DetallesOrdenCompraDto>> getDetalles(@PathVariable Long id) {
+    List<DetallesOrdenCompra> detalles = ordenCompraService.getDetalles(id);
+    return ResponseEntity.ok(detallesOrdenCompraMapper.toDtoList(detalles));
     }
 
     //Obtener todas las órdenes de compra

@@ -36,7 +36,7 @@ public class AuditoriaController {
         return auditoriaService.findById(id)
                 .map(auditoriaMapper::toAuditoriaDto)
                 .map(ResponseEntity::ok)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoría no encontrada"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "auditoria no encontrada"));
     }
 
     //  No hay POST, PUT o DELETE ya que la auditoría se genera automáticamente

@@ -6,8 +6,5 @@ import edu.unimag.entities.EstadoOrden;
 
 public interface EstadoOrdenService {
     List<EstadoOrden> findAll();
-    EstadoOrden create(EstadoOrden newEstadoOrden);
-    Optional<EstadoOrden> findById(Long id);
-    EstadoOrden update(Long id, EstadoOrden newEstadoOrden);
-    void delete(Long id);
+    Optional<EstadoOrden> findByName(String name);
 }

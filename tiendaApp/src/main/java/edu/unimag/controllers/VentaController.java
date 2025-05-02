@@ -1,8 +1,12 @@
 package edu.unimag.controllers;
 
+import edu.unimag.entities.DetallesVenta;
 import edu.unimag.entities.Venta;
 import edu.unimag.exception.EntidadNoEncontradaException;
 import edu.unimag.dto.VentaDto;
+import edu.unimag.dto.DetallesVentaCreateDto;
+import edu.unimag.dto.DetallesVentaDto;
+import edu.unimag.dto.DetallesVentaMapper;
 import edu.unimag.dto.VentaCreateDto;
 import edu.unimag.dto.VentaMapper;
 import edu.unimag.services.VentaService;
@@ -21,10 +25,13 @@ public class VentaController {
 
     private final VentaService ventaService;
     private final VentaMapper ventaMapper;
+    private final DetallesVentaMapper detallesVentaMapper;
+    
 
-    public VentaController(VentaService ventaService, ClienteService clienteService, UsuarioService usuarioService, VentaMapper ventaMapper) {
+    public VentaController(VentaService ventaService, ClienteService clienteService, UsuarioService usuarioService, VentaMapper ventaMapper,DetallesVentaMapper detallesVentaMapper) {
         this.ventaService = ventaService;
         this.ventaMapper = ventaMapper;
+        this.detallesVentaMapper = detallesVentaMapper;
     }
 
     @GetMapping
@@ -72,4 +79,22 @@ public class VentaController {
         ventaService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{id}/detalles")
+    public ResponseEntity<DetallesVentaDto> addDetalle(@PathVariable Long id, 
+                                                   @Valid @RequestBody DetallesVentaCreateDto dto) {
+    Venta venta = ventaService.addDetalle(id, dto);
+    DetallesVenta nuevoDetalle = venta.getDetalles()
+                                .get(venta.getDetalles().size() - 1);
+
+    return ResponseEntity.status(HttpStatus.CREATED)
+            .body(detallesVentaMapper.toDetallesVentaDto(nuevoDetalle));
+    
+    }
+
+    @GetMapping("/{id}/detalles")
+    public ResponseEntity<List<DetallesVentaDto>> getDetalles(@PathVariable Long id) {
+        List<DetallesVenta> detalles = ventaService.getDetalles(id);
+        return ResponseEntity.ok(detallesVentaMapper.toDtoList(detalles));
+    } 
 }

@@ -39,7 +39,7 @@ public class ClienteController {
         return clienteService.findById(id)
             .map(clienteMapper::toClienteDto)
             .map(ResponseEntity::ok)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente no encontrada"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente no encontrado"));
     }
 
     //Crear nuevo Cliente

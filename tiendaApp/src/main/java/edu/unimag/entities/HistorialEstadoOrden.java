@@ -58,7 +58,6 @@ public class HistorialEstadoOrden {
     private String observacion;
 
     public Long getOrdenCompraId() {
-        return this.getOrdenCompraId();  
-        
+        return this.ordenCompra != null ? this.ordenCompra.getId() : null;
     }
 }

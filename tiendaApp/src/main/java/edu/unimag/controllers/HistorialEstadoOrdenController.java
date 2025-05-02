@@ -40,15 +40,4 @@ public class HistorialEstadoOrdenController {
     
     }
    
-    //@PostMapping
-    //public ResponseEntity<HistorialEstadoOrdenDto> createHistorialEstadoOrden(@Valid @RequestBody HistorialEstadoOrdenCreateDto historialEstadoOrdenCreateDto) {
-    //    }
-
-    //  No hay PUT ya que el historial se crea al cambiar el estado de la orden
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteHistorialEstadoOrden(@PathVariable("id") Long id) {
-        historialEstadoOrdenService.delete(id);
-        return ResponseEntity.noContent().build();
-    }
 }
