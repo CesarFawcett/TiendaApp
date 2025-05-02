@@ -8,6 +8,5 @@ public interface HistorialEstadoOrdenService {
     List<HistorialEstadoOrden> findAll();
     HistorialEstadoOrden create(HistorialEstadoOrden newHistorialEstadoOrden);
     Optional<HistorialEstadoOrden> findById(Long id);
-    HistorialEstadoOrden update(Long id, HistorialEstadoOrden newHistorialEstadoOrden);
     void delete(Long id);
 }

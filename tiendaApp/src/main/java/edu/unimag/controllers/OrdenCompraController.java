@@ -4,10 +4,8 @@ import edu.unimag.dto.*;
 import edu.unimag.entities.DetallesOrdenCompra;
 import edu.unimag.entities.EstadoOrden;
 import edu.unimag.entities.OrdenCompra;
-import edu.unimag.entities.Producto;
 import edu.unimag.entities.Proveedor;
 import edu.unimag.exception.EntidadNoEncontradaException;
-import edu.unimag.services.DetallesOrdenCompraService;
 import edu.unimag.services.OrdenCompraService;
 import edu.unimag.services.ProveedorService;
 import org.springframework.http.HttpStatus;
@@ -120,10 +118,4 @@ public class OrdenCompraController {
         ordenCompraService.delete(id);
         return ResponseEntity.noContent().build();
     }
-
-    //  faltan metodos
-    //  TODO:  Agregar detalles a una orden de compra (POST /ordenes-compra/{id}/detalles)
-    //  TODO:  Obtener los detalles de una orden de compra (GET /ordenes-compra/{id}/detalles)
-    //  TODO:  Cambiar el estado de una orden de compra (PATCH /ordenes-compra/{id}/estado)
-    //  ...
 }
