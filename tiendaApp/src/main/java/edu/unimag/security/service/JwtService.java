@@ -20,7 +20,7 @@ public class JwtService {
     @Value("${JWT_SECRET_KEY}")
     private String secretKey;
 
-    @Value("${JWT_EXPIRATION_TIME}") // 24h por defecto
+    @Value("${JWT_EXPIRATION_TIME}") 
     private long expirationTime;
 
     public String generateToken(UserDetails userDetails) {
