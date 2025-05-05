@@ -3,7 +3,6 @@ package edu.unimag.security.config;
 import edu.unimag.security.filters.JwtAuthenticationFilter;
 import edu.unimag.security.service.CustomUserDetailsService;
 import lombok.AllArgsConstructor;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;

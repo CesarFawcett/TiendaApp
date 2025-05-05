@@ -27,5 +27,8 @@ public class DataInitializer implements CommandLineRunner {
             usuarioRepository.save(admin);
             System.out.println("Usuario admin creado: admin@tienda.com / admin123");
         }
+        //SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+        //String secretKey = Encoders.BASE64.encode(key.getEncoded());
+       // System.out.println("Clave Secreta (JWT_SECRET_KEY): " + secretKey);
     }
 }
