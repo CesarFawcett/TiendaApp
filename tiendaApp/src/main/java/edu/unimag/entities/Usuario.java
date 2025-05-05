@@ -4,7 +4,10 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -22,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Schema(name = "Usuario", description = "Persona con credenciales para acceder y operar el sistema")
 public class Usuario {
 
@@ -51,4 +55,9 @@ public class Usuario {
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
     private List<Venta> ventas = new ArrayList<>();
     
+    //para security
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+    return List.of(new SimpleGrantedAuthority("ROLE_" + rol.name()));
+}
+
 }
