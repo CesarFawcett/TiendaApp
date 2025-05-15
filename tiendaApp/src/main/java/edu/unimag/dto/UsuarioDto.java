@@ -21,5 +21,5 @@ public class UsuarioDto {
     private String email;
 
     @Schema(description = "Rol del usuario", example = "ADMINISTRADOR")
-    private Rol rol;
+    private Rol rol = Rol.USUARIO;
 }

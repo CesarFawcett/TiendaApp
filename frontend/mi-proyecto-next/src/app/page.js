@@ -1,190 +1,435 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from '../styles/page.module.css';
+import {
+  FaTh,
+  FaUsers,
+  FaBoxes,
+  FaShoppingCart,
+  FaChartLine,
+  FaClipboardCheck,
+  FaBars,
+  FaSignOutAlt,
+  FaPlus,
+  FaSearch,
+  FaEdit,
+  FaTrash,
+} from 'react-icons/fa';
 
 export default function Home() {
-  const [activeSection, setActiveSection] = useState(null);
-  const [formData, setFormData] = useState({
+  // Estados generales
+  const [activeSection, setActiveSection] = useState('Dashboard');
+  const [userName] = useState('Nombre del usuario');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Estados para productos
+  const [productos, setProductos] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [showProductoModal, setShowProductoModal] = useState(false);
+  const [nuevoProducto, setNuevoProducto] = useState({
     nombre: '',
-    email: '',
-    telefono: '',
-    empresa: '',
-    mensaje: ''
+    descripcion: '',
+    precio: 0,
+    stock: 0,
+    categoriaId: 1,
   });
 
+  // Funciones generales
   const toggleSection = (section) => {
-    setActiveSection(activeSection === section ? null : section);
+    setActiveSection(section);
+  };
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
+  };
+
+  const handleLogout = () => {
+    console.log('Cerrando sesión...');
+    // Lógica para cerrar sesión
+  };
+
+  // Funciones para productos
+  useEffect(() => {
+    if (activeSection === 'Productos') {
+      fetchProductos();
+    }
+  }, [activeSection]);
+
+  const fetchProductos = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('http://localhost:8080/productos');
+      if (!response.ok) throw new Error('Error al cargar productos');
+      const data = await response.json();
+      setProductos(Array.isArray(data) ? data : [data]);
+    } catch (err) {
+      setError(err.message);
+      console.error('Error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleProductoSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('http://localhost:8080/productos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nuevoProducto),
+      });
+
+      if (!response.ok) throw new Error('Error al crear producto');
+
+      setShowProductoModal(false);
+      setNuevoProducto({
+        nombre: '',
+        descripcion: '',
+        precio: 0,
+        stock: 0,
+        categoriaId: 1,
+      });
+      await fetchProductos();
+    } catch (err) {
+      setError(err.message);
+      console.error('Error:', err);
+    }
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Lógica para enviar el formulario
-    console.log('Formulario enviado:', formData);
+    setNuevoProducto({
+      ...nuevoProducto,
+      [name]:
+        name === 'precio'
+          ? parseFloat(value)
+          : name === 'stock' || name === 'categoriaId'
+          ? parseInt(value)
+          : value,
+    });
   };
 
   return (
-    <div className={styles.page}>
-      <header className={styles.header}>
-        <div className={styles.headerContent}>
-          <h1>Tienda App solucion para tiendas</h1>
-          <p>Innovación y tecnología para tu negocio</p>
+    <div className={`${styles.page} ${sidebarCollapsed ? styles.collapsed : ''}`}>
+      {/* Sidebar */}
+      <aside className={styles.sidebar}>
+        <div className={styles.sidebarHeader}>
+          <div className={styles.logo}>{!sidebarCollapsed && <h1>Kompta</h1>}</div>
+          <button onClick={toggleSidebar} className={styles.menuToggle}>
+            <FaBars />
+          </button>
         </div>
-        <nav className={styles.nav}>
-          <button 
-            onClick={() => toggleSection('servicios')} 
-            className={activeSection === 'servicios' ? styles.activeButton : ''}
-          >
-            Proveedores
-          </button>
-          <button 
-            onClick={() => toggleSection('contacto')}
-            className={activeSection === 'contacto' ? styles.activeButton : ''}
-          >
-            Productos
-          </button>
-          <button 
-            onClick={() => toggleSection('contacto')}
-            className={activeSection === 'contacto' ? styles.activeButton : ''}
-          >
-            Ventas
-          </button>
-          <button 
-            onClick={() => toggleSection('contacto')}
-            className={activeSection === 'contacto' ? styles.activeButton : ''}
-          >
-            Auditoria
-          </button>
-          <a href="/login" className={styles.loginLink}>Área de Clientes</a>
-        </nav>
-      </header>
 
-      <main className={styles.main}>
-        {/* Sección de Servicios */}
-        {activeSection === 'servicios' && (
-          <div className={styles.section}>
-            <h2>Nuestros Servicios Profesionales</h2>
-            <div className={styles.grid}>
-              {[
-                { id: 1, name: "Desarrollo Web", icon: "💻", desc: "Sitios web a medida con las últimas tecnologías" },
-                { id: 2, name: "Diseño UX/UI", icon: "🎨", desc: "Experiencias de usuario intuitivas y atractivas" },
-                { id: 3, name: "Marketing Digital", icon: "📈", desc: "Estrategias para aumentar tu presencia online" },
-                { id: 4, name: "Consultoría IT", icon: "🔍", desc: "Soluciones tecnológicas para tu negocio" },
-                { id: 5, name: "Cloud Solutions", icon: "☁️", desc: "Infraestructura escalable en la nube" },
-                { id: 6, name: "Soporte 24/7", icon: "🛠️", desc: "Asistencia técnica permanente" }
-              ].map((service) => (
-                <div key={service.id} className={styles.card}>
-                  <span className={styles.serviceIcon}>{service.icon}</span>
-                  <h3>{service.name}</h3>
-                  <p>{service.desc}</p>
-                </div>
-              ))}
+        <div className={styles.userWelcome}>
+          {!sidebarCollapsed && <h2>Bienvenido/a {userName}</h2>}
+        </div>
+
+        <nav className={styles.sidebarNav}>
+          <button
+            onClick={() => toggleSection('Dashboard')}
+            className={activeSection === 'Dashboard' ? styles.activeButton : ''}
+            title="Dashboard"
+          >
+            <FaTh />
+            {!sidebarCollapsed && <span>Dashboard</span>}
+          </button>
+
+          <button
+            onClick={() => toggleSection('Auditoria')}
+            className={activeSection === 'Auditoria' ? styles.activeButton : ''}
+            title="Auditoria"
+          >
+            <FaChartLine />
+            {!sidebarCollapsed && <span>Auditoria</span>}
+          </button>
+
+          <button
+            onClick={() => toggleSection('Usuarios')}
+            className={activeSection === 'Usuarios' ? styles.activeButton : ''}
+            title="Usuarios"
+          >
+            <FaUsers />
+            {!sidebarCollapsed && <span>Usuarios</span>}
+          </button>
+
+          <button
+            onClick={() => toggleSection('Productos')}
+            className={activeSection === 'Productos' ? styles.activeButton : ''}
+            title="Productos"
+          >
+            <FaBoxes />
+            {!sidebarCollapsed && <span>Productos</span>}
+          </button>
+
+          <button
+            onClick={() => toggleSection('Compras')}
+            className={activeSection === 'Compras' ? styles.activeButton : ''}
+            title="Compras"
+          >
+            <FaShoppingCart />
+            {!sidebarCollapsed && <span>Compras</span>}
+          </button>
+
+          <button
+            onClick={() => toggleSection('Proveedores')}
+            className={activeSection === 'Proveedores' ? styles.activeButton : ''}
+            title="Proveedores"
+          >
+            <FaClipboardCheck />
+            {!sidebarCollapsed && <span>Proveedores</span>}
+          </button>
+        </nav>
+
+        <div className={styles.sidebarFooter}>
+          <button onClick={handleLogout} className={styles.logoutButton} title="Cerrar sesión">
+            <FaSignOutAlt />
+            {!sidebarCollapsed && <span>Cerrar sesión</span>}
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className={styles.mainContent}>
+        {/* Dashboard Section */}
+        {activeSection === 'Dashboard' && (
+          <div className={styles.dashboard}>
+            <h2>Bienvenido/a</h2>
+            <div className={styles.statsGrid}>
+              <div className={styles.statCard}>
+                <h3>Gráfico Ventas</h3>
+                <p>Últimos 30 días</p>
+              </div>
+              <div className={styles.statCard}>
+                <h3>Productos Top</h3>
+                <p>Más vendidos</p>
+              </div>
+              <div className={styles.statCard}>
+                <h3>Últimas Órdenes</h3>
+                <p>Tablas</p>
+              </div>
+              <div className={styles.statCard}>
+                <h3>Alertas Pendientes</h3>
+                <p>Tablas</p>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Sección de Contacto */}
-        {activeSection === 'contacto' && (
-          <div className={styles.section}>
-            <h2>Contáctenos</h2>
-            <form className={styles.form} onSubmit={handleSubmit}>
-              <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                  <label htmlFor="nombre">Nombre Completo</label>
-                  <input 
-                    type="text" 
-                    id="nombre" 
-                    name="nombre" 
-                    value={formData.nombre}
-                    onChange={handleInputChange}
-                    required 
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label htmlFor="email">Correo Electrónico</label>
-                  <input 
-                    type="email" 
-                    id="email" 
-                    name="email" 
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required 
-                  />
-                </div>
-              </div>
-              
-              <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                  <label htmlFor="telefono">Teléfono</label>
-                  <input 
-                    type="tel" 
-                    id="telefono" 
-                    name="telefono" 
-                    value={formData.telefono}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label htmlFor="empresa">Empresa</label>
-                  <input 
-                    type="text" 
-                    id="empresa" 
-                    name="empresa" 
-                    value={formData.empresa}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-              
-              <div className={styles.formGroup}>
-                <label htmlFor="mensaje">Mensaje</label>
-                <textarea 
-                  id="mensaje" 
-                  name="mensaje" 
-                  rows="4"
-                  value={formData.mensaje}
-                  onChange={handleInputChange}
-                  required
-                ></textarea>
-              </div>
-              
-              <button type="submit" className={styles.submitButton}>Enviar Mensaje</button>
-            </form>
-          </div>
-        )}
+        {/* Productos Section */}
+        {activeSection === 'Productos' && (
+          <div className={styles.productosContainer}>
+            <div className={styles.productosHeader}>
+              <h1>
+                <FaBoxes /> Productos
+              </h1>
+              <button onClick={() => setShowProductoModal(true)} className={styles.nuevoProductoBtn}>
+                <FaPlus /> NUEVO PRODUCTO
+              </button>
+            </div>
 
-        {/* Mensaje cuando no hay sección activa */}
-        {!activeSection && (
-          <div className={styles.hero}>
-            <h2>Soluciones Tecnológicas para tu Empresa</h2>
-            <p>Descubre cómo podemos ayudarte a transformar tu negocio digitalmente</p>
-            <button 
-              onClick={() => toggleSection('servicios')} 
-              className={styles.ctaButton}
-            >
-              Conoce nuestros servicios
-            </button>
+            <div className={styles.productosToolbar}>
+              <div className={styles.showEntries}>
+                <span>Mostrar</span>
+                <select>
+                  <option>10</option>
+                  <option>25</option>
+                  <option>50</option>
+                </select>
+                <span>Entradas</span>
+              </div>
+              <div className={styles.searchBox}>
+                <FaSearch />
+                <input type="text" placeholder="Buscar..." />
+              </div>
+            </div>
+
+            <div className={styles.productosTableContainer}>
+              <h2>LISTA DE PRODUCTOS</h2>
+
+              {loading ? (
+                <p>Cargando productos...</p>
+              ) : error ? (
+                <div className={styles.emptyState}>
+                  <p>Error al cargar productos: {error}</p>
+                  <button onClick={fetchProductos} className={styles.nuevoProductoBtn}>
+                    Reintentar
+                  </button>
+                </div>
+              ) : productos.length === 0 ? (
+                <div className={styles.emptyState}>
+                  <p>No hay productos registrados</p>
+                  <button onClick={() => setShowProductoModal(true)} className={styles.nuevoProductoBtn}>
+                    <FaPlus /> Agregar primer producto
+                  </button>
+                </div>
+              ) : (
+                <div className={styles.tableWrapper}>
+                  <table className={styles.productosTable}>
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Stock</th>
+                        <th>Precio</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {productos.map((producto, index) => (
+                        <tr key={producto.id}>
+                          <td>{index + 1}</td>
+                          <td>
+                            <div className={styles.productName}>
+                              <span className={styles.name}>{producto.nombre}</span>
+                              {producto.descripcion && (
+                                <span className={styles.description}>{producto.descripcion}</span>
+                              )}
+                            </div>
+                          </td>
+                          <td>{producto.categoria?.nombre || 'General'}</td>
+                          <td>
+                            <span
+                              className={`${styles.stockBadge} ${
+                                producto.stock < 10 ? styles.lowStock : ''
+                              }`}
+                            >
+                              {producto.stock} unidades
+                            </span>
+                          </td>
+                          <td>
+                            $
+                            {producto.precio.toLocaleString('es-ES', {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </td>
+                          <td>
+                            <div className={styles.actions}>
+                              <button
+                                className={`${styles.actionBtn} ${styles.editBtn}`}
+                                title="Editar"
+                              >
+                                <FaEdit />
+                              </button>
+                              <button
+                                className={`${styles.actionBtn} ${styles.deleteBtn}`}
+                                title="Eliminar"
+                              >
+                                <FaTrash />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Nuevo Producto */}
+            {showProductoModal && (
+              <div className={styles.modalOverlay}>
+                <div className={styles.modalContent}>
+                  <h2>Nuevo Producto</h2>
+                  <form onSubmit={handleProductoSubmit} className={styles.modalForm}>
+                    <fieldset className={styles.formFieldset}>
+                      <legend className={styles.formLegend}>Información General</legend>
+                      <div className={styles.formGroup}>
+                        <label>Nombre:</label>
+                        <input
+                          type="text"
+                          name="nombre"
+                          value={nuevoProducto.nombre}
+                          onChange={handleInputChange}
+                          required
+                        />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>Descripción:</label>
+                        <textarea
+                          name="descripcion"
+                          value={nuevoProducto.descripcion}
+                          onChange={handleInputChange}
+                        />
+                      </div>
+                    </fieldset>
+
+                    <fieldset className={styles.formFieldset}>
+                      <legend className={styles.formLegend}>Precio y Stock</legend>
+                      <div className={styles.formGroup}>
+                        <label>Precio:</label>
+                        <input
+                          type="number"
+                          name="precio"
+                          value={nuevoProducto.precio}
+                          onChange={handleInputChange}
+                          step="0.01"
+                          min="0"
+                          required
+                        />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>Stock:</label>
+                        <input
+                          type="number"
+                          name="stock"
+                          value={nuevoProducto.stock}
+                          onChange={handleInputChange}
+                          min="0"
+                          required
+                        />
+                      </div>
+                    </fieldset>
+
+                    <fieldset className={styles.formFieldset}>
+                      <legend className={styles.formLegend}>Categoría</legend>
+                      <div className={styles.formGroup}>
+                        <label>Categoría ID:</label>
+                        <input
+                          type="number"
+                          name="categoriaId"
+                          value={nuevoProducto.categoriaId}
+                          onChange={handleInputChange}
+                          min="1"
+                          required
+                        />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>fecha:</label>
+                        <input
+                          type="text"
+                          name="fecha"
+                          value={nuevoProducto.fecha}
+                          onChange={handleInputChange}
+                          min="2025-12-10"
+                          required
+                        />
+                      </div>
+                    </fieldset>
+
+                    <div className={styles.modalButtons}>
+                      <button
+                        type="button"
+                        onClick={() => setShowProductoModal(false)}
+                        className={styles.cancelButton}
+                      >
+                        Cancelar
+                      </button>
+                      <button type="submit" className={styles.submitButton}>
+                        Guardar Producto
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </main>
-
-      <footer className={styles.footer}>
-        <div className={styles.footerContent}>
-          <p>© {new Date().getFullYear()} Empresa de Soluciones Digitales. Todos los derechos reservados.</p>
-          <div className={styles.footerLinks}>
-            <a href="#">Política de Privacidad</a>
-            <a href="#">Términos de Servicio</a>
-            <a href="#">Contacto</a>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

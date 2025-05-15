@@ -25,5 +25,7 @@ public enum Rol {
     /**
      * Responsable de las operaciones en bodega e inventario
      */
-    ALMACEN
+    ALMACEN,
+
+    USUARIO
 }

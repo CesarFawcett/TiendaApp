@@ -15,6 +15,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/productos")
 public class ProductoController {

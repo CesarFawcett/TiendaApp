@@ -27,6 +27,6 @@ public class UsuarioCreateDto {
 
     @NotNull(message = "El rol es obligatorio")
     @Schema(description = "Rol del usuario", example = "ADMINISTRADOR")
-    private Rol rol;
+     private Rol rol = Rol.USUARIO;
 }
 
