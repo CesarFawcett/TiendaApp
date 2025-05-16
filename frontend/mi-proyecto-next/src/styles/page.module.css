@@ -502,13 +502,12 @@
   width: 100%;
 }
 
+}
 .productosTable th,
 .productosTable td {
   padding: 0.75rem;
-  font-size: 2.9rem;
+  font-size: 1.0rem;
 }
-}
-
 /* Estado vacío */
 .emptyState {
   display: flex;
@@ -548,7 +547,7 @@
   
 }
 .productName .description {
-  font-size: 0.85rem;
+  font-size: 0.55rem;
   color: #666;
   margin-top: 0.25rem;
   
@@ -557,16 +556,17 @@
 /* Mejora para los badges de stock */
 .stockBadge {
   display: inline-block;
-  padding: 0.25rem 0.5rem;
+  padding: 0.4rem 0.8rem;
   border-radius: 12px;
   font-size: 0.85rem;
   font-weight: 500;
-  background-color: #e8f5e9;
+  background-color: #c6ecc9;
   color: #2e7d32;
+  margin: 0.3rem 0;
 }
 
 .stockBadge.lowStock {
-  background-color: #ffebee;
+  background-color: #f1c8ce;
   color: var(--danger-color);
 }
 

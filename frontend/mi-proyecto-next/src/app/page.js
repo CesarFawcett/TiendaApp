@@ -2,18 +2,8 @@
 import { useState, useEffect } from 'react';
 import styles from '../styles/page.module.css';
 import {
-  FaTh,
-  FaUsers,
-  FaBoxes,
-  FaShoppingCart,
-  FaChartLine,
-  FaClipboardCheck,
-  FaBars,
-  FaSignOutAlt,
-  FaPlus,
-  FaSearch,
-  FaEdit,
-  FaTrash,
+  FaTh,FaUsers,FaBoxes,FaShoppingCart,FaChartLine,FaClipboardCheck,
+  FaBars,FaSignOutAlt,FaPlus,FaSearch,FaEdit,FaTrash,
 } from 'react-icons/fa';
 
 export default function Home() {
@@ -21,6 +11,7 @@ export default function Home() {
   const [activeSection, setActiveSection] = useState('Dashboard');
   const [userName] = useState('Nombre del usuario');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [itemsPerPage, setItemsPerPage] = useState(5); // Valor por defecto: 5
 
   // Estados para productos
   const [productos, setProductos] = useState([]);
@@ -32,6 +23,7 @@ export default function Home() {
     descripcion: '',
     precio: 0,
     stock: 0,
+    fecha: 2025-12-10,
     categoriaId: 1,
   });
 
@@ -89,6 +81,7 @@ export default function Home() {
         descripcion: '',
         precio: 0,
         stock: 0,
+        fecha: 2025-12-10,
         categoriaId: 1,
       });
       await fetchProductos();
@@ -98,6 +91,60 @@ export default function Home() {
     }
   };
 
+  const handleDeleteProducto = async (id) => {
+  if (window.confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+    try {
+      const response = await fetch(`http://localhost:8080/productos/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) throw new Error('Error al eliminar producto');
+
+      // Actualizar la lista de productos después de eliminar
+      await fetchProductos();
+    } catch (err) {
+      setError(err.message);
+      console.error('Error:', err);
+    }
+  }
+};
+const [showEditModal, setShowEditModal] = useState(false);
+const [editingProducto, setEditingProducto] = useState(null);
+const handleEditClick = (producto) => {
+  setEditingProducto(producto);
+  setShowEditModal(true);
+};
+
+const handleEditSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const response = await fetch(`http://localhost:8080/productos/${editingProducto.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(editingProducto),
+    });
+
+    if (!response.ok) throw new Error('Error al actualizar producto');
+
+    setShowEditModal(false);
+    setEditingProducto(null);
+    await fetchProductos();
+  } catch (err) {
+    setError(err.message);
+    console.error('Error:', err);
+  }
+};
+const handleEditInputChange = (e) => {
+  const { name, value } = e.target;
+  setEditingProducto({
+    ...editingProducto,
+    [name]: 
+      name === 'precio' ? parseFloat(value) :
+      name === 'stock' || name === 'categoriaId' ? parseInt(value) :
+      value
+  });
+};
+//termina productos
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNuevoProducto({
@@ -232,10 +279,11 @@ export default function Home() {
             <div className={styles.productosToolbar}>
               <div className={styles.showEntries}>
                 <span>Mostrar</span>
-                <select>
-                  <option>10</option>
-                  <option>25</option>
-                  <option>50</option>
+                <select value={itemsPerPage} 
+                  onChange={(e) => setItemsPerPage(Number(e.target.value))}>
+                   <option value={5}>5</option>
+                   <option value={10}>10</option>
+                   <option value={20}>20</option>
                 </select>
                 <span>Entradas</span>
               </div>
@@ -260,9 +308,6 @@ export default function Home() {
               ) : productos.length === 0 ? (
                 <div className={styles.emptyState}>
                   <p>No hay productos registrados</p>
-                  <button onClick={() => setShowProductoModal(true)} className={styles.nuevoProductoBtn}>
-                    <FaPlus /> Agregar primer producto
-                  </button>
                 </div>
               ) : (
                 <div className={styles.tableWrapper}>
@@ -274,57 +319,58 @@ export default function Home() {
                         <th>Categoría</th>
                         <th>Stock</th>
                         <th>Precio</th>
+                        <th>Fecha</th>
                         <th>Acciones</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {productos.map((producto, index) => (
-                        <tr key={producto.id}>
-                          <td>{index + 1}</td>
-                          <td>
-                            <div className={styles.productName}>
-                              <span className={styles.name}>{producto.nombre}</span>
-                              {producto.descripcion && (
-                                <span className={styles.description}>{producto.descripcion}</span>
-                              )}
-                            </div>
-                          </td>
-                          <td>{producto.categoria?.nombre || 'General'}</td>
-                          <td>
-                            <span
-                              className={`${styles.stockBadge} ${
-                                producto.stock < 10 ? styles.lowStock : ''
-                              }`}
-                            >
-                              {producto.stock} unidades
-                            </span>
-                          </td>
-                          <td>
-                            $
-                            {producto.precio.toLocaleString('es-ES', {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}
-                          </td>
-                          <td>
-                            <div className={styles.actions}>
-                              <button
-                                className={`${styles.actionBtn} ${styles.editBtn}`}
-                                title="Editar"
-                              >
-                                <FaEdit />
-                              </button>
-                              <button
-                                className={`${styles.actionBtn} ${styles.deleteBtn}`}
-                                title="Eliminar"
-                              >
-                                <FaTrash />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
+  {productos.slice(0, itemsPerPage).map((producto, index) => (
+    <tr key={producto.id}>
+      <td>{index + 1}</td>
+      <td>
+        <div className={styles.productName}>
+          <span className={styles.name}>{producto.nombre}</span>
+          {producto.descripcion && (
+            <span className={styles.description}>{producto.descripcion}</span>
+          )}
+        </div>
+      </td>
+      <td>{producto.categoria?.nombre || 'General'}</td>
+      <td>
+        <span className={`${styles.stockBadge} ${producto.stock < 10 ? styles.lowStock : ''}`}>
+          {producto.stock} unidades
+        </span>
+      </td>
+      <td>
+        ${producto.precio.toLocaleString('es-ES', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}
+      </td>
+      <td>
+        {producto.fecha ? new Date(producto.fecha).toLocaleDateString('es-ES') : 'N/A'}
+      </td>
+      <td>
+        <div className={styles.actions}>
+          <button
+            className={`${styles.actionBtn} ${styles.editBtn}`}
+            title="Editar"
+            onClick={() => handleEditClick(producto)}
+          >
+            <FaEdit />
+          </button>
+          <button
+            className={`${styles.actionBtn} ${styles.deleteBtn}`}
+            title="Eliminar"
+            onClick={() => handleDeleteProducto(producto.id)}
+          >
+            <FaTrash />
+          </button>
+        </div>
+      </td>
+    </tr>
+  ))}
+</tbody>
                   </table>
                 </div>
               )}
@@ -383,6 +429,17 @@ export default function Home() {
                           required
                         />
                       </div>
+                      <div className={styles.formGroup}>
+                        <label>fecha:</label>
+                        <input
+                          type="localDate"
+                          name="fecha"
+                          value={nuevoProducto.fecha}
+                          onChange={handleInputChange}
+                          min="2025-12-10"
+                          required
+                        />
+                      </div>
                     </fieldset>
 
                     <fieldset className={styles.formFieldset}>
@@ -395,17 +452,6 @@ export default function Home() {
                           value={nuevoProducto.categoriaId}
                           onChange={handleInputChange}
                           min="1"
-                          required
-                        />
-                      </div>
-                      <div className={styles.formGroup}>
-                        <label>fecha:</label>
-                        <input
-                          type="text"
-                          name="fecha"
-                          value={nuevoProducto.fecha}
-                          onChange={handleInputChange}
-                          min="2025-12-10"
                           required
                         />
                       </div>
@@ -427,8 +473,104 @@ export default function Home() {
                 </div>
               </div>
             )}
-          </div>
-        )}
+            {/* Modal Editar Producto */}
+            {showEditModal && editingProducto && (
+              <div className={styles.modalOverlay}>
+                <div className={styles.modalContent}>
+                  <h2>Editar Producto</h2>
+                  <form onSubmit={handleEditSubmit} className={styles.modalForm}>
+                    <fieldset className={styles.formFieldset}>
+                      <legend className={styles.formLegend}>Información General</legend>
+                      <div className={styles.formGroup}>
+                        <label>Nombre:</label>
+                        <input
+                          type="text"
+                          name="nombre"
+                          value={editingProducto.nombre}
+                          onChange={handleEditInputChange}
+                          required
+                        />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>Descripción:</label>
+                        <textarea
+                          name="descripcion"
+                          value={editingProducto.descripcion}
+                          onChange={handleEditInputChange}
+                        />
+                      </div>
+                    </fieldset>
+
+                    <fieldset className={styles.formFieldset}>
+                      <legend className={styles.formLegend}>Precio y Stock</legend>
+                      <div className={styles.formGroup}>
+                        <label>Precio:</label>
+                        <input
+                          type="number"
+                          name="precio"
+                          value={editingProducto.precio}
+                          onChange={handleEditInputChange}
+                          step="0.01"
+                          min="0"
+                          required
+                        />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>Stock:</label>
+                        <input
+                          type="number"
+                          name="stock"
+                          value={editingProducto.stock}
+                          onChange={handleEditInputChange}
+                          min="0"
+                          required
+                        />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>Fecha:</label>
+                        <input
+                          type="date"
+                          name="fecha"
+                          value={editingProducto.fecha}
+                          onChange={handleEditInputChange}
+                          required
+                        />
+                      </div>
+                    </fieldset>
+
+                    <fieldset className={styles.formFieldset}>
+                      <legend className={styles.formLegend}>Categoría</legend>
+                      <div className={styles.formGroup}>
+                        <label>Categoría ID:</label>
+                        <input
+                          type="number"
+                          name="categoriaId"
+                          value={editingProducto.categoriaId}
+                          onChange={handleEditInputChange}
+                          min="1"
+                          required
+                        />
+                      </div>
+                    </fieldset>
+
+                    <div className={styles.modalButtons}>
+                      <button
+                        type="button"
+                        onClick={() => setShowEditModal(false)}
+                        className={styles.cancelButton}
+                      >
+                        Cancelar
+                      </button>
+                      <button type="submit" className={styles.submitButton}>
+                        Guardar Cambios
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+          </div>          
+      )}
       </main>
     </div>
   );

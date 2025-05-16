@@ -30,7 +30,8 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/h2-console/**","/usuarios","/productos").permitAll()
+                .requestMatchers("/auth/**", "/swagger-ui/**", "/v3/api-docs/**", 
+                                 "/h2-console/**","/usuarios","/productos/**").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(sess -> sess
