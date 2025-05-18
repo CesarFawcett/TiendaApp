@@ -23,7 +23,7 @@ public class UsuarioCreateDto {
 
     @NotBlank(message = "La contraseña es obligatoria")
     @Schema(description = "Contraseña del usuario", example = "password123")
-    private String contraseña;
+    private String password;
 
     @NotNull(message = "El rol es obligatorio")
     @Schema(description = "Rol del usuario", example = "ADMINISTRADOR")

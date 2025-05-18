@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import edu.unimag.entities.Usuario;
+import edu.unimag.exception.EntidadNoEncontradaException;
 import edu.unimag.repositories.UsuarioRepository;
 import edu.unimag.services.UsuarioService;
 
@@ -14,6 +15,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
     @Override
     public List<Usuario> findAll() {
         return usuarioRepository.findAll();
@@ -31,24 +33,36 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public Usuario update(Long id, Usuario newUsuario) {
-         Optional<Usuario> existingUsuario = usuarioRepository.findById(id);
-    if (existingUsuario.isPresent()) {
-        Usuario usuarioToUpdate = existingUsuario.get();
-        usuarioToUpdate.setNombre(newUsuario.getNombre());
-        usuarioToUpdate.setEmail(newUsuario.getEmail());
-        usuarioToUpdate.setContraseña(newUsuario.getContraseña());
-        usuarioToUpdate.setRol(newUsuario.getRol());
-        usuarioToUpdate.setVentas(newUsuario.getVentas());
-        return usuarioRepository.save(usuarioToUpdate);
-    } else {
-        return null;
-    }
-         
+        return usuarioRepository.findById(id)
+            .map(usuarioExistente -> {
+                usuarioExistente.setNombre(newUsuario.getNombre());
+                usuarioExistente.setEmail(newUsuario.getEmail());
+                usuarioExistente.setPassword(newUsuario.getPassword());
+                usuarioExistente.setRol(newUsuario.getRol());
+                // No deberías actualizar las ventas aquí normalmente
+                return usuarioRepository.save(usuarioExistente);
+            })
+            .orElseThrow(() -> new EntidadNoEncontradaException("Usuario no encontrado con id: " + id, id));
     }
 
     @Override
     public void delete(Long id) {
-        usuarioRepository.deleteById(id); 
+        if (!usuarioRepository.existsById(id)) {
+            throw new EntidadNoEncontradaException("Usuario no encontrado con id: " + id, id);
+        }
+        usuarioRepository.deleteById(id);
     }
-    
+
+    @Override
+    public boolean existsById(Long id) {
+        return usuarioRepository.existsById(id);
+    }
+
+    @Override
+    public Usuario update(Usuario usuario) throws IllegalArgumentException {
+        if (usuario.getId() == null) {
+            throw new IllegalArgumentException("El ID del usuario no puede ser nulo");
+        }
+        return this.update(usuario.getId(), usuario);
+    }
 }

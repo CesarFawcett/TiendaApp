@@ -22,7 +22,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         
         return User.builder()
             .username(usuario.getEmail())
-            .password(usuario.getContraseña())
+            .password(usuario.getPassword())
             .roles(usuario.getRol().name()) // Asegúrate que Rol sea un enum
             .build();
     }

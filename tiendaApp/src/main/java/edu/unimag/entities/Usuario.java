@@ -45,7 +45,7 @@ public class Usuario {
 
     @Schema(description = "Contraseña encriptada para autenticación segura", example = "$2a$10$xyz...")
     @Column(nullable = false, length = 60)  
-    private String contraseña;
+    private String password;
 
     @Schema(description = "Rol que determina los permisos del usuario.)", example = "ADMINISTRADOR")
     @Enumerated(EnumType.STRING)

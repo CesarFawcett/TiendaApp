@@ -10,10 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-
 import jakarta.validation.Valid;
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/usuarios")
 public class UsuarioController {
@@ -30,8 +30,7 @@ public class UsuarioController {
     @GetMapping
     public ResponseEntity<List<UsuarioDto>> getAllUsuarios() {
         List<Usuario> usuarios = usuarioService.findAll();
-        List<UsuarioDto> usuarioDtos = usuarioMapper.toDtoList(usuarios);
-        return ResponseEntity.ok(usuarioDtos);
+        return ResponseEntity.ok(usuarioMapper.toDtoList(usuarios));
     }
 
     //Obtener los usuarios por id
@@ -43,34 +42,39 @@ public class UsuarioController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
     }
 
-    //Crear nueva categoría
+    //Crear nueva usuario
     @PostMapping
     public ResponseEntity<UsuarioDto> createUsuario(@Valid @RequestBody UsuarioCreateDto usuarioCreateDto) {
         Usuario usuario = usuarioMapper.toUsuario(usuarioCreateDto);
         Usuario createdUsuario = usuarioService.create(usuario);
-        UsuarioDto usuarioDto = usuarioMapper.toUsuarioDto(createdUsuario);
-        return new ResponseEntity<>(usuarioDto, HttpStatus.CREATED); 
+        return new ResponseEntity<>(usuarioMapper.toUsuarioDto(createdUsuario), HttpStatus.CREATED); 
     
     }
 
     //Actualizar usuario
-    @PutMapping("/{id}")
+   @PutMapping("/{id}")
     public ResponseEntity<UsuarioDto> updateUser(@PathVariable Long id, @Valid @RequestBody UsuarioCreateDto usuarioCreateDto) {
-         try {
-            Usuario usuario = usuarioMapper.toUsuario(usuarioCreateDto);
-            Usuario updatedUsuario = usuarioService.update(id, usuario);
-            return ResponseEntity.ok(usuarioMapper.toUsuarioDto(updatedUsuario));
-        } catch (EntidadNoEncontradaException e) {
+    try {
+        if (!usuarioService.existsById(id)) {
             return ResponseEntity.notFound().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build(); 
-        } 
+        }
+        Usuario usuario = usuarioMapper.toUsuario(usuarioCreateDto);
+        usuario.setId(id); // Asegurar que el ID se mantenga
+        Usuario updatedUsuario = usuarioService.update(usuario);
+        return ResponseEntity.ok(usuarioMapper.toUsuarioDto(updatedUsuario));
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.badRequest().build();
     }
+   }
 
     //Eliminar usuario
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
+    public ResponseEntity<Void> deleteUsuario(@PathVariable Long id) {
+    try {
         usuarioService.delete(id);
         return ResponseEntity.noContent().build();
+    } catch (EntidadNoEncontradaException e) {
+        return ResponseEntity.notFound().build();
     }
+}
 }
