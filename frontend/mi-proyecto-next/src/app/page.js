@@ -75,7 +75,13 @@ export default function Home() {
   };
 
   const handleLogout = () => {
-    console.log('Cerrando sesión...');
+    // Elimina el token o datos de sesión
+  localStorage.removeItem('authToken'); // o sessionStorage
+  // Redirige a la página de login
+  window.location.href = '/login'; // Asegúrate de tener esta ruta
+  // Opcional: Limpiar estados relacionados
+  setUser(null);
+  // Agrega aquí cualquier otra limpieza necesaria
     // Lógica para cerrar sesión
   };
 
@@ -684,6 +690,7 @@ const handleEditUsuarioInputChange = (e) => {
           </form>
         </div>
        </div>)}
+      {/* otros */}
      </div>)}
      </main>
   </div>);
