@@ -2,7 +2,8 @@ package edu.unimag.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -35,9 +36,9 @@ public class Venta {
     @Schema(description = "ID único autogenerado de la venta", example = "1")
     private Long id;
 
-    @Schema(description = "Fecha y hora exacta de la transacción de venta", example = "2025-04-15T14:30:00")
+    @Schema(description = "Fecha y hora exacta de la transacción de venta", example = "2025-04-15T14")
     @Column(nullable = false)
-    private LocalDateTime fecha;
+    private LocalDate fecha;
 
     // Relación con Usuario
     @Schema(description = "Usuario que registró la venta en el sistema")

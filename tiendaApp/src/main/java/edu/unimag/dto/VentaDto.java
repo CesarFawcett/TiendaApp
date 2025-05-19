@@ -3,7 +3,7 @@ package edu.unimag.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
@@ -15,7 +15,7 @@ public class VentaDto {
     private Long id;
 
     @Schema(description = "Fecha y hora de la venta", example = "2024-03-15T10:00:00")
-    private LocalDateTime fecha;
+    private LocalDate fecha;
 
     @Schema(description = "ID del cliente de la venta", example = "101")
     private Long clienteId;
