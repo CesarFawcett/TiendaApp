@@ -5,6 +5,73 @@ import {
   FaTh,FaUsers,FaBoxes,FaShoppingCart,FaChartLine,FaClipboardCheck,
   FaBars,FaSignOutAlt,FaPlus,FaSearch,FaEdit,FaTrash,
 } from 'react-icons/fa';
+//====================================
+import { Bar } from 'react-chartjs-2';
+import axios from 'axios';
+
+// Mueve esto fuera del componente Home
+const GraficoVentas = () => {
+  const [chartData, setChartData] = useState({});
+
+  useEffect(() => {
+    const fetchVentas = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/ventas/ultimas-ventas');
+        const ventas = response.data;
+        
+        // Procesar datos para el gráfico
+        const labels = ventas.map(v => 
+          new Date(v.fecha).toLocaleDateString()
+        );
+        const data = ventas.map(v => v.total);
+        
+        setChartData({
+          labels: labels.reverse(), // Orden ascendente
+          datasets: [
+            {
+              label: 'Ventas últimos 30 días',
+              data: data.reverse(),
+              backgroundColor: 'rgba(54, 162, 235, 0.5)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1
+            }
+          ]
+        });
+      } catch (error) {
+        console.error('Error fetching ventas:', error);
+      }
+    };
+
+    fetchVentas();
+  }, []);
+
+  return (
+    <div className={styles.chartContainer}>
+      <h2>Ventas últimos 30 días</h2>
+      <Bar
+        data={chartData}
+        options={{
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Monto ($)'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Fecha'
+              }
+            }
+          }
+        }}
+      />
+    </div>
+  );
+};
 
 export default function Home() {
 
@@ -98,6 +165,9 @@ export default function Home() {
   fechaInicio: '',
   fechaFin: ''
   });  
+
+  ///ventas graficas
+  
   // =============================================
   // EFECTOS
   // =============================================
@@ -785,7 +855,7 @@ const handleAuditoriaFiltroChange = (e) => {
           <button onClick={() => toggleSection('Usuarios')}className={activeSection === 'Usuarios' ? styles.activeButton : ''}title="Usuarios"><FaUsers />{!sidebarCollapsed && <span>Usuarios</span>}</button>
           <button onClick={() => toggleSection('Productos')}className={activeSection === 'Productos' ? styles.activeButton : ''}title="Productos"><FaBoxes />{!sidebarCollapsed && <span>Productos</span>}</button>
           <button onClick={() => toggleSection('Ventas')}className={activeSection === 'Ventas' ? styles.activeButton : ''}title="Ventas"><FaShoppingCart />{!sidebarCollapsed && <span>Ventas</span>}</button>
-          <button onClick={() => toggleSection('Clientes')}className={activeSection === 'Clientes' ? styles.activeButton : ''}title="Clientes"><FaShoppingCart />{!sidebarCollapsed && <span>Clientes</span>}</button>
+          <button onClick={() => toggleSection('Clientes')}className={activeSection === 'Clientes' ? styles.activeButton : ''}title="Clientes"><FaUsers />{!sidebarCollapsed && <span>Clientes</span>}</button>
           <button onClick={() => toggleSection('Proveedores')}className={activeSection === 'Proveedores' ? styles.activeButton : ''}title="Proveedores"><FaClipboardCheck />{!sidebarCollapsed && <span>Proveedores</span>}</button>
           
         </nav>

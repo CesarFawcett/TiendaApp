@@ -1,14 +1,10 @@
 package edu.unimag.controllers;
 
-import edu.unimag.entities.Cliente;
 import edu.unimag.entities.DetallesVenta;
-import edu.unimag.entities.Rol;
-import edu.unimag.entities.Usuario;
 import edu.unimag.entities.Venta;
 import edu.unimag.exception.EntidadNoEncontradaException;
 import edu.unimag.repositories.ClienteRepository;
 import edu.unimag.repositories.UsuarioRepository;
-import edu.unimag.repositories.VentaRepository;
 import edu.unimag.dto.VentaDto;
 import edu.unimag.dto.DetallesVentaCreateDto;
 import edu.unimag.dto.DetallesVentaDto;
@@ -35,8 +31,6 @@ public class VentaController {
     private final DetallesVentaMapper detallesVentaMapper;
     private final ClienteRepository clienteRepository;
     private final UsuarioRepository usuarioRepository;
-    private final ClienteService clienteService;
-    private final UsuarioService usuarioService;
     
 
     public VentaController(VentaService ventaService, ClienteService clienteService, UsuarioService usuarioService, VentaMapper ventaMapper,DetallesVentaMapper detallesVentaMapper,
@@ -46,8 +40,6 @@ public class VentaController {
         this.detallesVentaMapper = detallesVentaMapper;
         this.clienteRepository = clienteRepository;
         this.usuarioRepository = usuarioRepository;
-        this.clienteService = clienteService;
-        this.usuarioService = usuarioService;
     }
 
     @GetMapping
@@ -122,4 +114,15 @@ public class VentaController {
         List<DetallesVenta> detalles = ventaService.getDetalles(id);
         return ResponseEntity.ok(detallesVentaMapper.toDtoList(detalles));
     } 
+
+    @GetMapping("/ultimas-ventas")
+    public ResponseEntity<List<VentaDto>> getUltimasVentas() {
+    // Obtener las últimas 30 ventas ordenadas por fecha descendente
+    List<Venta> ultimasVentas = ventaService.findTop30ByOrderByFechaDesc();
+    
+    // Mapear a DTO
+    List<VentaDto> ventaDtos = ventaMapper.toDtoList(ultimasVentas);
+    
+    return ResponseEntity.ok(ventaDtos);
+}
 }

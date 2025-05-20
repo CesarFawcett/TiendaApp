@@ -43,7 +43,7 @@ public class Venta {
     // Relación con Usuario
     @Schema(description = "Usuario que registró la venta en el sistema")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id", nullable = true)
+    @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
     // Relación con DetalleVenta 
@@ -54,7 +54,7 @@ public class Venta {
     // Relacion con Cliente
     @Schema(description = "Cliente que realizó la compra y a quien se factura")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cliente_id", nullable = true)
+    @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 
     /**

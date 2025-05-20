@@ -15,4 +15,5 @@ public interface VentaService {
     void delete(Long id);
     Venta addDetalle(Long ventaId, DetallesVentaCreateDto dto);
     List<DetallesVenta> getDetalles(Long ventaId);
+    List<Venta> findTop30ByOrderByFechaDesc();
 }

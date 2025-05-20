@@ -94,5 +94,10 @@ public class VentaServiceImpl implements VentaService {
 
         return venta.getDetalles();
     }
+
+    @Override
+    public List<Venta> findTop30ByOrderByFechaDesc() {
+       return ventaRepository.findTop30ByOrderByFechaDesc();
+    }
     
 }
