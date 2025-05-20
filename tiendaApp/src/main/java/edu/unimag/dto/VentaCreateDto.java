@@ -1,13 +1,11 @@
 package edu.unimag.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import java.time.LocalDate;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
 @Data
-@AllArgsConstructor
 @Schema(description = "DTO para la creación de una nueva Venta")
 public class VentaCreateDto {
     @NotNull(message = "La fecha es obligatoria")

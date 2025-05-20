@@ -10,11 +10,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
-@RequestMapping("/cliente")
+@RequestMapping("/clientes")
 public class ClienteController {
 
     private final ClienteService clienteService;
@@ -25,7 +28,39 @@ public class ClienteController {
         this.clienteMapper = clienteMapper;
     }
     
-    //Obtener todas los clientes
+    @PostConstruct
+    public void initSampleClientes() { 
+    // Datos de clientes de ejemplo
+    String[][] clientesData = {
+        {"Juan Pérez", "juan.perez@email.com", "+57 3101234567", "Calle 123 #45-67, Bogotá"},
+        {"María Rodríguez", "maria.rod@email.com", "+57 3202345678", "Carrera 56 #12-34, Medellín"},
+        {"Carlos Gómez", "c.gomez@email.com", "+57 3153456789", "Avenida 7 #23-45, Cali"},
+        {"Ana López", "a.lopez@email.com", "+57 3004567890", "Diagonal 34 #56-78, Barranquilla"},
+        {"Pedro Martínez", "p.martinez@email.com", "+57 3185678901", "Transversal 12 #34-56, Cartagena"},
+        {"Laura García", "l.garcia@email.com", "+57 3136789012", "Calle 78 #90-12, Bucaramanga"},
+        {"Jorge Ramírez", "j.ramirez@email.com", "+57 3177890123", "Carrera 45 #67-89, Pereira"},
+        {"Sofía Herrera", "s.herrera@email.com", "+57 3148901234", "Avenida 30 #40-50, Manizales"},
+        {"Diego Castro", "d.castro@email.com", "+57 3129012345", "Calle 100 #11-22, Cúcuta"}
+    };
+
+    for (String[] data : clientesData) {
+        try {
+            ClienteCreateDto clienteCreateDto = new ClienteCreateDto();
+            clienteCreateDto.setNombre(data[0]);
+            clienteCreateDto.setEmail(data[1]);
+            clienteCreateDto.setTelefono(data[2]);
+            clienteCreateDto.setDireccion(data[3]);
+            
+            Cliente cliente = clienteMapper.toCliente(clienteCreateDto);
+            clienteService.create(cliente);
+        } catch (Exception e) {
+            System.err.println("Error creando cliente: " + data[0] + " - " + e.getMessage());
+        }
+    }
+    }
+
+
+    //Obtener todos los clientes
     @GetMapping
     public ResponseEntity<List<ClienteDto>> getAllClientes() {
         List<Cliente> clientes = clienteService.findAll();

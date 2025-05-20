@@ -2,8 +2,8 @@ package edu.unimag.dto;
 
 import edu.unimag.entities.Cliente;
 import org.springframework.stereotype.Component;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class ClienteMapper {
@@ -26,10 +26,11 @@ public class ClienteMapper {
         cliente.setDireccion(clienteCreateDto.getDireccion());
         return cliente;
     }
-
-    public List<ClienteDto> toDtoList(List<Cliente> clientes) {
-        return clientes.stream()
-                .map(this::toClienteDto)
-                .collect(Collectors.toList());
+     public List<ClienteDto> toDtoList(List<Cliente> clientess) {
+        List<ClienteDto> clienteDtos = new ArrayList<>();
+        for (Cliente clientes : clientess) {
+            clienteDtos.add(toClienteDto(clientes));
+        }
+        return clienteDtos;
     }
 }

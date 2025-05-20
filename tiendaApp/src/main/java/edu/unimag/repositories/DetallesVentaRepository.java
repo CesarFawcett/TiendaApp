@@ -1,5 +1,7 @@
 package edu.unimag.repositories;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import edu.unimag.entities.DetallesVenta;
 
@@ -15,5 +17,7 @@ import edu.unimag.entities.DetallesVenta;
  */
 
 public interface DetallesVentaRepository extends JpaRepository<DetallesVenta, Long>{
+
+    List<DetallesVenta> findByVentaId(Long ventaId);
     
 }

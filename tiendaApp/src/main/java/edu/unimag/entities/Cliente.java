@@ -24,7 +24,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @AllArgsConstructor
 @Schema(name = "Cliente", description = "Persona o empresa que realiza compras en el sistema")
 public class Cliente {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Schema(description = "ID único autogenerado del cliente", example = "1")
@@ -53,4 +53,7 @@ public class Cliente {
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
     private List<Venta> ventas = new ArrayList<>();
 
+    public Cliente(Long id) {
+    this.id = id;
+    }
 }

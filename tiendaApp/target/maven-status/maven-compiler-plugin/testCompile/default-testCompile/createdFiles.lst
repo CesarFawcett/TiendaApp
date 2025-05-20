@@ -1,0 +1,5 @@
+edu\unimag\ApiApplicationTests.class
+edu\unimag\controllers\testIntegration\CategoriaControllerIntegrationTest.class
+edu\unimag\controllers\testIntegration\ProductoControllerIntegrationTest.class
+edu\unimag\controllers\testUnit\ProductoControllerUnitTest.class
+edu\unimag\controllers\testUnit\CategoriaControllerUnitTest.class

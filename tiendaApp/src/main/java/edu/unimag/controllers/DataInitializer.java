@@ -1,12 +1,12 @@
 package edu.unimag.controllers;
 
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
 import edu.unimag.entities.Rol;
 import edu.unimag.entities.Usuario;
 import edu.unimag.repositories.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor

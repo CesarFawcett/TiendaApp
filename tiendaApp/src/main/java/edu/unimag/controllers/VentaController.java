@@ -1,8 +1,14 @@
 package edu.unimag.controllers;
 
+import edu.unimag.entities.Cliente;
 import edu.unimag.entities.DetallesVenta;
+import edu.unimag.entities.Rol;
+import edu.unimag.entities.Usuario;
 import edu.unimag.entities.Venta;
 import edu.unimag.exception.EntidadNoEncontradaException;
+import edu.unimag.repositories.ClienteRepository;
+import edu.unimag.repositories.UsuarioRepository;
+import edu.unimag.repositories.VentaRepository;
 import edu.unimag.dto.VentaDto;
 import edu.unimag.dto.DetallesVentaCreateDto;
 import edu.unimag.dto.DetallesVentaDto;
@@ -19,6 +25,7 @@ import org.springframework.web.server.ResponseStatusException;
 import jakarta.validation.Valid;
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/ventas")
 public class VentaController {
@@ -26,19 +33,30 @@ public class VentaController {
     private final VentaService ventaService;
     private final VentaMapper ventaMapper;
     private final DetallesVentaMapper detallesVentaMapper;
+    private final ClienteRepository clienteRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final ClienteService clienteService;
+    private final UsuarioService usuarioService;
     
 
-    public VentaController(VentaService ventaService, ClienteService clienteService, UsuarioService usuarioService, VentaMapper ventaMapper,DetallesVentaMapper detallesVentaMapper) {
+    public VentaController(VentaService ventaService, ClienteService clienteService, UsuarioService usuarioService, VentaMapper ventaMapper,DetallesVentaMapper detallesVentaMapper,
+    ClienteRepository clienteRepository, UsuarioRepository usuarioRepository) {
         this.ventaService = ventaService;
         this.ventaMapper = ventaMapper;
         this.detallesVentaMapper = detallesVentaMapper;
+        this.clienteRepository = clienteRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.clienteService = clienteService;
+        this.usuarioService = usuarioService;
     }
 
     @GetMapping
     public ResponseEntity<List<VentaDto>> getAllVentas() {
-        List<Venta> ventas = ventaService.findAll();
-        List<VentaDto> ventaDtos = ventaMapper.toDtoList(ventas);
-        return ResponseEntity.ok(ventaDtos);
+    System.out.println("Entrando a getAllVentas"); // Debug 1
+    List<Venta> ventas = ventaService.findAll();
+    System.out.println("Ventas encontradas: " + ventas.size()); // Debug 2
+    List<VentaDto> ventaDtos = ventaMapper.toDtoList(ventas);
+    return ResponseEntity.ok(ventaDtos);
     }
 
     //Obtener una venta por ID
@@ -53,10 +71,17 @@ public class VentaController {
     //Crear nueva venta
     @PostMapping
     public ResponseEntity<VentaDto> createVenta(@Valid @RequestBody VentaCreateDto ventaCreateDto) {
-        Venta venta = ventaMapper.toVenta(ventaCreateDto);
-        Venta createdVenta = ventaService.create(venta);
-        VentaDto ventaDto = ventaMapper.toVentaDto(createdVenta);
-        return new ResponseEntity<>(ventaDto, HttpStatus.CREATED); 
+    // Validar que los IDs de cliente y usuario existen
+    if (!clienteRepository.existsById(ventaCreateDto.getClienteId())) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente no encontrado");
+    }
+    if (!usuarioRepository.existsById(ventaCreateDto.getUsuarioId())) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuario no encontrado");
+    }
+
+    Venta venta = ventaMapper.toVenta(ventaCreateDto);
+    Venta createdVenta = ventaService.create(venta);
+    return new ResponseEntity<>(ventaMapper.toVentaDto(createdVenta), HttpStatus.CREATED);
     }
 
     //Actualizar venta

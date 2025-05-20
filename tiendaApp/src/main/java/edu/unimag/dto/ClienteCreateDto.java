@@ -1,13 +1,11 @@
 package edu.unimag.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 @Data
-@AllArgsConstructor
 @Schema(description = "DTO para la creación de un nuevo Cliente")
 public class ClienteCreateDto {
     @NotBlank(message = "El nombre es obligatorio")

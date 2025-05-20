@@ -58,6 +58,10 @@ public class Usuario {
     //para security
     public Collection<? extends GrantedAuthority> getAuthorities() {
     return List.of(new SimpleGrantedAuthority("ROLE_" + rol.name()));
-}
+    }
+
+    public Usuario(Long id) {
+    this.id = id;
+    }
 
 }

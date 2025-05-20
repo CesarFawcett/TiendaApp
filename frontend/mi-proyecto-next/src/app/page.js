@@ -125,6 +125,18 @@ export default function Home() {
     fetchAuditorias();
   }
   }, [activeSection]);
+
+  useEffect(() => {
+  if (activeSection === 'Clientes') {
+    fetchClientes();
+  }
+  }, [activeSection]);
+
+  useEffect(() => {
+  if (activeSection === 'Ventas') {
+    fetchVentas();
+  }
+  }, [activeSection]);
   // =============================================
   // FUNCIONES GENERALES
   // =============================================
@@ -622,7 +634,7 @@ const fetchClientes = async () => {
   setLoading(true);
   setError(null);
   try {
-    const response = await fetch('http://localhost:8080/cliente');
+    const response = await fetch('http://localhost:8080/clientes');
     if (!response.ok) throw new Error('Error al cargar clientes');
     const data = await response.json();
     setClientes(Array.isArray(data) ? data : [data]);
@@ -637,7 +649,7 @@ const fetchClientes = async () => {
 const handleClienteSubmit = async (e) => {
   e.preventDefault();
   try {
-    const response = await fetch('http://localhost:8080/cliente', {
+    const response = await fetch('http://localhost:8080/clientes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(nuevoCliente),
@@ -662,7 +674,7 @@ const handleClienteSubmit = async (e) => {
 const handleDeleteCliente = async (id) => {
   if (window.confirm('¿Estás seguro de que deseas eliminar este cliente?')) {
     try {
-      const response = await fetch(`http://localhost:8080/cliente/${id}`, {
+      const response = await fetch(`http://localhost:8080/clientes/${id}`, {
         method: 'DELETE',
       });
 
@@ -683,7 +695,7 @@ const handleEditClienteClick = (cliente) => {
 const handleEditClienteSubmit = async (e) => {
   e.preventDefault();
   try {
-    const response = await fetch(`http://localhost:8080/cliente/${editingCliente.id}`, {
+    const response = await fetch(`http://localhost:8080/clientes/${editingCliente.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(editingCliente),

@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException; 
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
+
+import java.time.LocalDate;
 import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:3000")
@@ -32,17 +34,57 @@ public class ProductoController {
 
     @PostConstruct
     public void initSampleProducto() {
-        var categoria = categoriaService.findById(1L)
-                .orElseThrow(() -> new RuntimeException("Categoría con ID 1 no encontrada"));
-        ProductoCreateDto productoCreateDto = new ProductoCreateDto();
-        productoCreateDto.setNombre("papa criolla");
-        productoCreateDto.setDescripcion("también llamada papa amarilla");
-        productoCreateDto.setPrecio(20.5);
-        productoCreateDto.setFecha(java.time.LocalDate.of(2025, 10, 29));
-        productoCreateDto.setStock(20);
-        Producto producto = productoMapper.toProducto(productoCreateDto);
-        producto.setCategoria(categoria); 
-        productoService.create(producto);
+    // Esperar a que las categorías se creen
+    try {
+        Thread.sleep(1000); // Pequeña pausa para asegurar que las categorías estén creadas
+    } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+    }
+
+    // Datos de productos de ejemplo
+    String[][] productosData = {
+        {"Papa criolla", "También llamada papa amarilla", "20.5", "50", "2025-10-29", "1"},
+        {"Leche entera", "Leche pasteurizada 1 litro", "3500", "3", "2025-06-15", "2"},
+        {"Pechuga de pollo", "Pechuga sin hueso ni piel", "12000", "2", "2025-07-20", "3"},
+        {"Manzana roja", "Manzana deliciosa", "2500", "40", "2025-07-10", "4"},
+        {"Zanahoria", "Zanahoria orgánica", "1800", "35", "2025-06-30", "5"},
+        {"Yuca", "Yuca fresca", "3000", "20", "2025-08-15", "1"},
+        {"Queso fresco", "Queso campesino 250g", "5500", "15", "2025-06-25", "2"},
+        {"Carne molida", "Carne de res molida", "15000", "18", "2025-07-25", "3"},
+        {"Banano", "Banano maduro", "1200", "60", "2025-07-30", "4"},
+        {"Brócoli", "Brócoli fresco", "4000", "22", "2025-06-18", "5"},
+        {"Papa pastusa", "Papa para cocinar", "2500", "45", "2025-09-10", "1"},
+        {"Yogurt", "Yogurt natural 1 litro", "6000", "12", "2025-06-20", "2"},
+        {"Pescado", "Filete de pescado fresco", "18000", "10", "2025-07-22", "3"},
+        {"Naranja", "Naranja valencia", "1500", "55", "2025-07-05", "4"},
+        {"Espinaca", "Espinaca fresca", "2200", "30", "2025-06-12", "5"},
+        {"Ñame", "Ñame fresco", "2800", "25", "2025-08-20", "1"},
+        {"Mantequilla", "Mantequilla sin sal 250g", "7000", "8", "2025-07-15", "2"},
+        {"Cerdo", "Lomo de cerdo", "14000", "12", "2025-06-05", "3"},
+        {"Pera", "Pera williams", "3000", "28", "2025-07-20", "4"},
+        {"Cebolla", "Cebolla cabezona", "2000", "40", "2025-07-25", "5"}
+    };
+
+    for (String[] data : productosData) {
+        try {
+            var categoria = categoriaService.findById(Long.parseLong(data[5]))
+                .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
+            
+            ProductoCreateDto productoCreateDto = new ProductoCreateDto();
+            productoCreateDto.setNombre(data[0]);
+            productoCreateDto.setDescripcion(data[1]);
+            productoCreateDto.setPrecio(Double.parseDouble(data[2]));
+            productoCreateDto.setStock(Integer.parseInt(data[3]));
+            productoCreateDto.setFecha(LocalDate.parse(data[4]));
+            productoCreateDto.setCategoriaId(Long.parseLong(data[5]));
+            
+            Producto producto = productoMapper.toProducto(productoCreateDto);
+            producto.setCategoria(categoria);
+            productoService.create(producto);
+        } catch (Exception e) {
+            System.err.println("Error creando producto: " + data[0] + " - " + e.getMessage());
+        }
+    }
     }
 
     @PostMapping

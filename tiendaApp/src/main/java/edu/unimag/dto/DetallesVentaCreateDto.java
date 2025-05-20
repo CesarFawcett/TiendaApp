@@ -1,13 +1,11 @@
 package edu.unimag.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.NotNull;
 
 @Data
-@AllArgsConstructor
 @Schema(description = "DTO para la creación de un nuevo Detalle de Venta")
 public class DetallesVentaCreateDto {
 

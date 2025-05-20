@@ -26,11 +26,22 @@ public class CategoriaController {
     }
 
     @PostConstruct
-    public void initSampleCategoria() {
-        Categoria categoria1 = new Categoria();
-        categoria1.setNombre("Tubérculo");
-        categoria1.setDescripcion("Carbohidratos complejos");
-        categoriaService.create(categoria1);
+    public void initSampleCategoria() { 
+    // Crear 5 categorías diferentes
+    String[][] categoriasData = {
+        {"Tubérculo", "Carbohidratos complejos"},
+        {"Lácteos", "Productos derivados de la leche"},
+        {"Carnes", "Proteínas animales"},
+        {"Frutas", "Alimentos naturales dulces"},
+        {"Verduras", "Hortalizas y vegetales"}
+    };
+
+    for (String[] data : categoriasData) {
+        Categoria categoria = new Categoria();
+        categoria.setNombre(data[0]);
+        categoria.setDescripcion(data[1]);
+        categoriaService.create(categoria);
+    }
     }
 
     //Crear nueva categoría
