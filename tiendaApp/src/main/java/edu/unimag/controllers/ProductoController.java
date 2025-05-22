@@ -3,6 +3,7 @@ package edu.unimag.controllers;
 import edu.unimag.dto.ProductoCreateDto;
 import edu.unimag.dto.ProductoDto;
 import edu.unimag.dto.ProductoMapper;
+import edu.unimag.dto.ProductoMasVendidoDto;
 import edu.unimag.entities.Producto;
 import edu.unimag.exception.EntidadNoEncontradaException;
 import edu.unimag.services.ProductoService;
@@ -43,26 +44,26 @@ public class ProductoController {
 
     // Datos de productos de ejemplo
     String[][] productosData = {
-        {"Papa criolla", "También llamada papa amarilla", "20.5", "50", "2025-10-29", "1"},
-        {"Leche entera", "Leche pasteurizada 1 litro", "3500", "3", "2025-06-15", "2"},
+        {"Papa criolla lb", "También llamada papa amarilla", "2000", "50", "2025-10-29", "1"},
+        {"Leche entera ", "Leche pasteurizada 1 litro", "5500", "3", "2025-06-15", "2"},
         {"Pechuga de pollo", "Pechuga sin hueso ni piel", "12000", "2", "2025-07-20", "3"},
-        {"Manzana roja", "Manzana deliciosa", "2500", "40", "2025-07-10", "4"},
-        {"Zanahoria", "Zanahoria orgánica", "1800", "35", "2025-06-30", "5"},
-        {"Yuca", "Yuca fresca", "3000", "20", "2025-08-15", "1"},
-        {"Queso fresco", "Queso campesino 250g", "5500", "15", "2025-06-25", "2"},
-        {"Carne molida", "Carne de res molida", "15000", "18", "2025-07-25", "3"},
-        {"Banano", "Banano maduro", "1200", "60", "2025-07-30", "4"},
-        {"Brócoli", "Brócoli fresco", "4000", "22", "2025-06-18", "5"},
-        {"Papa pastusa", "Papa para cocinar", "2500", "45", "2025-09-10", "1"},
-        {"Yogurt", "Yogurt natural 1 litro", "6000", "12", "2025-06-20", "2"},
-        {"Pescado", "Filete de pescado fresco", "18000", "10", "2025-07-22", "3"},
-        {"Naranja", "Naranja valencia", "1500", "55", "2025-07-05", "4"},
-        {"Espinaca", "Espinaca fresca", "2200", "30", "2025-06-12", "5"},
-        {"Ñame", "Ñame fresco", "2800", "25", "2025-08-20", "1"},
-        {"Mantequilla", "Mantequilla sin sal 250g", "7000", "8", "2025-07-15", "2"},
-        {"Cerdo", "Lomo de cerdo", "14000", "12", "2025-06-05", "3"},
-        {"Pera", "Pera williams", "3000", "28", "2025-07-20", "4"},
-        {"Cebolla", "Cebolla cabezona", "2000", "40", "2025-07-25", "5"}
+        {"Manzana roja bolsa", "Manzana deliciosa", "4500", "40", "2025-07-10", "4"},
+        {"Zanahoria lb", "Zanahoria orgánica", "2500", "35", "2025-06-30", "5"},
+        {"Yuca lb", "Yuca fresca", "3000", "20", "2025-08-15", "1"},
+        {"Queso fresco lb", "Queso campesino ", "5500", "15", "2025-06-25", "2"},
+        {"Carne molida lb", "Carne de res molida", "15000", "18", "2025-07-25", "3"},
+        {"Banano unidad", "Banano maduro", "500", "60", "2025-07-30", "4"},
+        {"Brócoli lb", "Brócoli fresco", "4000", "22", "2025-06-18", "5"},
+        {"Papa pastusa lb", "Papa para cocinar", "3500", "45", "2025-09-10", "1"},
+        {"Yogurt litro", "Yogurt natural", "6500", "12", "2025-06-20", "2"},
+        {"Pescado paq", "Filete de pescado fresco", "18000", "10", "2025-07-22", "3"},
+        {"Naranja bolsa", "Naranja valencia", "3500", "55", "2025-07-05", "4"},
+        {"Espinaca lb", "Espinaca fresca", "3200", "30", "2025-06-12", "5"},
+        {"Ñame lb", "Ñame fresco", "2800", "25", "2025-08-20", "1"},
+        {"Mantequilla paq", "Mantequilla sin sal ", "7000", "8", "2025-07-15", "2"},
+        {"Cerdo paq", "Lomo de cerdo", "14000", "12", "2025-06-05", "3"},
+        {"Pera bolsa", "Pera williams", "3000", "28", "2025-07-20", "4"},
+        {"Cebolla bolsa", "Cebolla cabezona", "2000", "40", "2025-07-25", "5"}
     };
 
     for (String[] data : productosData) {
@@ -135,5 +136,12 @@ public class ProductoController {
     public ResponseEntity<Void> deleteProducto(@PathVariable Long id) {
         productoService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+     @GetMapping("/mas-vendidos") // <--- La ruta del endpoint
+    public ResponseEntity<List<ProductoMasVendidoDto>> getTopSellingProducts() {
+        // Puedes pasar un límite aquí, por ejemplo, 5 o 10
+        List<ProductoMasVendidoDto> topProducts = productoService.findTopSellingProducts(5); // <-- Obtiene los 5 más vendidos
+        return ResponseEntity.ok(topProducts);
     }
 }

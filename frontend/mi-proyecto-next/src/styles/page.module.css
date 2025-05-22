@@ -414,6 +414,8 @@
 /*-----*/
 .page {
   grid-template-columns: var(--sidebar-collapsed-width) 1fr;
+  display: flex;
+  transition: all 0.
 }
 
 .page:not(.collapsed) {
@@ -1068,4 +1070,127 @@
 .chartContainer canvas {
   max-height: 400px;
   width: 100% !important;
+}
+
+.ventasHeaderButtons {
+  display: flex;
+  gap: 10px;
+}
+
+.ventasPruebaBtn {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ventasPruebaBtn:hover {
+  background-color: #5a6268;
+}
+
+/* ... Tus estilos existentes ... */
+
+/* MODIFICAR el statCard para que sea clickeable y tenga un cursor */
+.statCard {
+  cursor: pointer; /* <-- AGREGADO */
+  background-color: var(--card-bg-color, #fff); /* Ejemplo: un color de fondo de tarjeta */
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.statCard:hover {
+  transform: translateY(-5px);
+}
+
+/* AGREGAR estilos para el contenedor del mini gráfico */
+.miniChartWrapper {
+  width: 100%; /* O un tamaño fijo como 200px */
+  height: 150px; /* Altura para la miniatura */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+  padding: 5px; /* Pequeño padding interno */
+  background-color: var(--bg-color, #f9f9f9); /* Un fondo ligero para el gráfico */
+  border-radius: 4px;
+}
+
+/* AGREGAR estilos específicos para el gráfico mini */
+.chartMini {
+  width: 100%;
+  height: 100%;
+  /* Podrías añadir más estilos aquí si necesitas */
+}
+
+/* AGREGAR estilos para el Modal/Overlay del gráfico grande */
+.chartModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7); /* Fondo semi-transparente oscuro */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Asegura que esté por encima de todo */
+}
+
+.chartModalContent {
+  background-color: var(--bg-color, #fff); /* Color de fondo del modal */
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  position: relative;
+  width: 90%; /* Ancho del modal */
+  max-width: 800px; /* Ancho máximo */
+  height: 80%; /* Altura del modal */
+  max-height: 600px; /* Altura máxima */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centra el contenido */
+  justify-content: center; /* Centra el contenido */
+}
+
+/* AGREGAR estilos para el botón de cierre del modal */
+.chartModalCloseBtn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-color, #333); /* Color del botón de cierre */
+  transition: color 0.2s;
+}
+
+.chartModalCloseBtn:hover {
+  color: var(--primary-color, #007bff); /* Un color para el hover */
+}
+
+/* MODIFICAR si ya lo tenías, para asegurar que ocupe todo el espacio en el modal */
+.chartContainer {
+  width: 100%;
+  height: 100%; /* Asegura que el gráfico use el 100% del espacio del modal */
+}
+
+/* Estilo para mensajes de error si no lo tienes */
+.errorMessage {
+    color: red;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 10px;
 }

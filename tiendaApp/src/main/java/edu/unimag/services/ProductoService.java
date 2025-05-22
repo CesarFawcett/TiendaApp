@@ -2,6 +2,8 @@ package edu.unimag.services;
 
 import java.util.List;
 import java.util.Optional;
+
+import edu.unimag.dto.ProductoMasVendidoDto;
 import edu.unimag.entities.Producto;
 
 public interface ProductoService {
@@ -10,4 +12,5 @@ public interface ProductoService {
     Optional<Producto> findById(Long id);
     Producto update(Long id, Producto newProducto);
     void delete(Long id);
+    List<ProductoMasVendidoDto> findTopSellingProducts(int i);
 }

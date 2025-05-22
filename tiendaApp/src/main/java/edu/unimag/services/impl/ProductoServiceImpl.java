@@ -4,9 +4,12 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import edu.unimag.dto.ProductoMasVendidoDto;
 import edu.unimag.entities.Producto;
 import edu.unimag.repositories.ProductoRepository;
 import edu.unimag.services.ProductoService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 @Service
 public class ProductoServiceImpl implements ProductoService {
@@ -14,6 +17,9 @@ public class ProductoServiceImpl implements ProductoService {
     @Autowired
     private ProductoRepository productoRepository;
 
+    @PersistenceContext 
+    private EntityManager entityManager;
+    
     @Override
     public List<Producto> findAll() {
        return productoRepository.findAll();
@@ -51,5 +57,22 @@ public class ProductoServiceImpl implements ProductoService {
       productoRepository.deleteById(id);
     }
 
+    @Override
+     public List<ProductoMasVendidoDto> findTopSellingProducts(int limit) {
+        // Esta es una consulta JPQL de ejemplo. Puede que necesites ajustarla
+        // dependiendo de cómo estén modeladas tus relaciones de Ventas y DetallesVenta.
+        // Asume que tienes una relación Venta -> DetallesVenta -> Producto y que DetallesVenta
+        // tiene una 'cantidad'.
+
+        String jpql = "SELECT NEW edu.unimag.dto.ProductoMasVendidoDto(dp.producto.id, dp.producto.nombre, SUM(dp.cantidad)) " +
+              "FROM DetallesVenta dp " +
+              "GROUP BY dp.producto.id, dp.producto.nombre " +
+              "ORDER BY SUM(dp.cantidad) DESC";
+
+        return entityManager.createQuery(jpql, ProductoMasVendidoDto.class)
+                .setMaxResults(limit)
+                .getResultList();
+    }
+    
     
 }

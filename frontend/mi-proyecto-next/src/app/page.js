@@ -9,27 +9,75 @@ import {
 import { Bar } from 'react-chartjs-2';
 import axios from 'axios';
 
-// Mueve esto fuera del componente Home
-const GraficoVentas = () => {
-  const [chartData, setChartData] = useState({});
+// Importa y registra los componentes necesarios de Chart.js
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement, // Necesario para Doughnut/Pie charts
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js';
+
+// Registra los componentes (Asegúrate de que ArcElement esté aquí si usas Doughnut/Pie)
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement, // Asegúrate de registrar ArcElement
+  Title,
+  Tooltip,
+  Legend
+);
+// Componente reutilizable para el modal/overlay del gráfico grande
+const ChartModal = ({ children, onClose }) => {
+  return (
+    <div className={styles.chartModalOverlay} onClick={onClose}>
+      <div className={styles.chartModalContent} onClick={(e) => e.stopPropagation()}>
+        <button onClick={onClose} className={styles.chartModalCloseBtn}>X</button>
+        {children}
+      </div>
+    </div>
+  );
+};
+
+// Componente para el Gráfico de Ventas
+const GraficoVentas = ({ isMini = false }) => { // <--- AGREGAR la prop isMini
+  const [chartData, setChartData] = useState({
+    labels: [],
+    datasets: [
+      {
+        label: 'Ventas', // Etiqueta más genérica para mini
+        data: [],
+        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 1
+      }
+    ]
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchVentas = async () => {
       try {
+        setLoading(true);
+        setError(null);
         const response = await axios.get('http://localhost:8080/ventas/ultimas-ventas');
         const ventas = response.data;
         
-        // Procesar datos para el gráfico
         const labels = ventas.map(v => 
           new Date(v.fecha).toLocaleDateString()
         );
         const data = ventas.map(v => v.total);
         
         setChartData({
-          labels: labels.reverse(), // Orden ascendente
+          labels: labels.reverse(),
           datasets: [
             {
-              label: 'Ventas últimos 30 días',
+              label: 'Ventas últimos 30 días', // Etiqueta completa para el gráfico grande
               data: data.reverse(),
               backgroundColor: 'rgba(54, 162, 235, 0.5)',
               borderColor: 'rgba(54, 162, 235, 1)',
@@ -37,50 +85,221 @@ const GraficoVentas = () => {
             }
           ]
         });
-      } catch (error) {
-        console.error('Error fetching ventas:', error);
+      } catch (err) {
+        console.error('Error fetching ventas:', err);
+        setError('No se pudieron cargar los datos de ventas.');
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchVentas();
   }, []);
 
-  return (
-    <div className={styles.chartContainer}>
-      <h2>Ventas últimos 30 días</h2>
-      <Bar
-        data={chartData}
-        options={{
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true,
-              title: {
-                display: true,
-                text: 'Monto ($)'
-              }
-            },
-            x: {
-              title: {
-                display: true,
-                text: 'Fecha'
-              }
-            }
+  const options = {
+    responsive: true,
+    maintainAspectRatio: !isMini, // <--- MODIFICADO: Adapta el tamaño según si es mini o no
+    plugins: {
+      legend: {
+        display: !isMini, // <--- MODIFICADO: Oculta la leyenda en versión mini
+        position: 'top',
+      },
+      title: {
+        display: !isMini, // <--- MODIFICADO: Oculta el título en versión mini
+        text: 'Ventas últimos 30 días'
+      },
+      tooltip: {
+        enabled: !isMini, // <--- MODIFICADO: Deshabilita tooltips en versión mini
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        display: !isMini, // <--- MODIFICADO: Oculta el eje Y en versión mini
+        title: {
+          display: !isMini,
+          text: 'Monto ($)'
+        },
+        ticks: { // <--- AGREGADO: Para controlar las etiquetas en mini
+          maxTicksLimit: isMini ? 3 : 5,
+          font: {
+            size: isMini ? 8 : 12
           }
-        }}
-      />
+        }
+      },
+      x: {
+        display: !isMini, // <--- MODIFICADO: Oculta el eje X en versión mini
+        title: {
+          display: !isMini,
+          text: 'Fecha'
+        },
+        ticks: { // <--- AGREGADO: Para controlar las etiquetas en mini
+          maxTicksLimit: isMini ? 3 : 5,
+          font: {
+            size: isMini ? 8 : 12
+          }
+        }
+      }
+    }
+  };
+
+  if (loading) return isMini ? <p>Cargando...</p> : <p>Cargando ventas...</p>;
+  if (error) return isMini ? <p>Error</p> : <p className={styles.errorMessage}>{error}</p>;
+  if (chartData.labels.length === 0) return isMini ? <p>Sin datos</p> : <p>No hay datos de ventas para mostrar.</p>;
+
+  return (
+    // <div className={isMini ? styles.chartMini : styles.chartContainer}> <--- Asigna clase CSS según isMini
+    <div className={isMini ? styles.chartMini : styles.chartContainer}>
+      {isMini ? null : <h2>Ventas últimos 30 días</h2>} {/* <--- No muestra título en mini */}
+      <Bar data={chartData} options={options} />
     </div>
   );
 };
 
+const GraficoProductosTop = ({ isMini = false }) => {
+  const [chartData, setChartData] = useState({
+    labels: [],
+    datasets: [
+      {
+        label: 'Cantidad Vendida',
+        data: [],
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)',
+          'rgba(75, 192, 192, 0.6)', 'rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)'
+        ],
+        borderColor: [
+          'rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)',
+          'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)'
+        ],
+        borderWidth: 1
+      }
+    ]
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchProductosTop = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        // Asegúrate de que este endpoint '/productos/mas-vendidos' está implementado en tu backend
+        const response = await axios.get('http://localhost:8080/productos/mas-vendidos');
+        const productos = response.data;
+
+        const labels = productos.map(p => p.nombreProducto);
+        const data = productos.map(p => p.cantidadVendida);
+
+        setChartData({
+          labels: labels,
+          datasets: [
+            {
+              label: 'Cantidad Vendida',
+              data: data,
+              backgroundColor: [
+                'rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)', 'rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)'
+              ],
+              borderColor: [
+                'rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)'
+              ],
+              borderWidth: 1
+            }
+          ]
+        });
+      } catch (err) {
+        console.error('Error fetching top products:', err);
+        setError('No se pudieron cargar los productos más vendidos.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProductosTop();
+  }, []);
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: !isMini,
+    plugins: {
+      legend: {
+        display: !isMini, // Ocultar leyenda en versión mini
+        position: 'top',
+      },
+      title: {
+        display: !isMini, // Ocultar título en versión mini
+        text: 'Productos Más Vendidos'
+      },
+      tooltip: {
+        enabled: !isMini, // Deshabilitar tooltips en versión mini
+      }
+    },
+    scales: {
+      x: {
+        display: !isMini, // Ocultar eje X en versión mini
+        title: {
+          display: !isMini,
+          text: 'Producto'
+        },
+        ticks: { // Para controlar las etiquetas en mini
+          maxTicksLimit: isMini ? 3 : 5,
+          font: {
+            size: isMini ? 8 : 12
+          }
+        }
+      },
+      y: {
+        beginAtZero: true,
+        display: !isMini, // Ocultar eje Y en versión mini
+        title: {
+          display: !isMini,
+          text: 'Cantidad Vendida'
+        },
+        ticks: { // Para controlar las etiquetas en mini
+          maxTicksLimit: isMini ? 3 : 5,
+          font: {
+            size: isMini ? 8 : 12
+          }
+        }
+      }
+    }
+  };
+
+  if (loading) return isMini ? <p>Cargando...</p> : <p>Cargando productos más vendidos...</p>;
+  if (error) return isMini ? <p>Error</p> : <p className={styles.errorMessage}>{error}</p>;
+  if (chartData.labels.length === 0) return isMini ? <p>Sin datos</p> : <p>No hay datos de productos más vendidos para mostrar.</p>;
+
+  // Puedes cambiar el tipo de gráfico aquí, por ejemplo, a <Doughnut> o <Pie>
+  return (
+    <div className={isMini ? styles.chartMini : styles.chartContainer}>
+      {isMini ? null : <h2>Productos Más Vendidos</h2>}
+      <Bar data={chartData} options={options} /> {/* O usa <Doughnut> */}
+    </div>
+  );
+};
 export default function Home() {
 
   // =============================================
   // ESTADOS
   // =============================================
-
-  // Estados generales
   const [activeSection, setActiveSection] = useState('Dashboard');
+  //const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [expandedChartType, setExpandedChartType] = useState(null); 
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
+  };
+
+  // AGREGAR ESTAS DOS FUNCIONES
+  const handleExpandChart = (chartType) => {
+    setExpandedChartType(chartType);
+  };
+
+  const handleCloseExpandedChart = () => {
+    setExpandedChartType(null);
+  };
+  // Estados generales
   const [user, setUser] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -95,7 +314,7 @@ export default function Home() {
     descripcion: '',
     precio: 0,
     stock: 0,
-    fecha: "",
+    fecha: "", 
     categoriaId: 1,
   });
   const [showEditModal, setShowEditModal] = useState(false);
@@ -213,10 +432,6 @@ export default function Home() {
 
   const toggleSection = (section) => {
     setActiveSection(section);
-  };
-
-  const toggleSidebar = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
   };
 
   const handleLogout = () => {
@@ -696,6 +911,114 @@ const handleDetalleInputChange = (e) => {
   });
 };
 
+const generarVentasDePrueba = async () => {
+  if (!window.confirm('¿Desea generar ventas de prueba? Esto creará 2 ventas con 3 productos cada una.')) {
+    return;
+  }
+
+  try {
+    setLoading(true);
+    
+    // ventas de prueba
+    const venta1 = {
+      fecha: new Date().toISOString().split('T')[0],
+      clienteId: 1,
+      usuarioId: 1,
+      detalles: [
+        { productoId: 1, cantidad: 2, precioUnitario: 10.50 },
+        { productoId: 2, cantidad: 1, precioUnitario: 25.75 },
+        { productoId: 3, cantidad: 3, precioUnitario: 5.20 }
+      ]
+    };
+    const venta2 = {
+      fecha: new Date(Date.now() - 86400000).toISOString().split('T')[0], // Ayer
+      clienteId: 2,
+      usuarioId: 1,
+      detalles: [
+        { productoId: 2, cantidad: 2, precioUnitario: 25.75 },
+        { productoId: 4, cantidad: 1, precioUnitario: 15.30 },
+        { productoId: 1, cantidad: 2, precioUnitario: 10.40 }
+      ]
+    };
+    const venta3 = {
+      fecha: new Date(Date.now() - 86400000).toISOString().split('T')[0], // Ayer
+      clienteId: 2,
+      usuarioId: 1,
+      detalles: [
+        { productoId: 2, cantidad: 2, precioUnitario: 25.75 },
+        { productoId: 4, cantidad: 1, precioUnitario: 15.30 },
+        { productoId: 2, cantidad: 3, precioUnitario: 40.40 }
+      ]
+    };
+    const venta4 = {
+      fecha: new Date(Date.now() - 86400000).toISOString().split('T')[0], // Ayer
+      clienteId: 2,
+      usuarioId: 1,
+      detalles: [
+        { productoId: 2, cantidad: 2, precioUnitario: 25.75 },
+        { productoId: 3, cantidad: 4, precioUnitario: 20.30 },
+        { productoId: 5, cantidad: 4, precioUnitario: 8.40 }
+      ]
+    };
+    const venta5 = {
+      fecha: new Date(Date.now() - 86400000).toISOString().split('T')[0], // Ayer
+      clienteId: 2,
+      usuarioId: 1,
+      detalles: [
+        { productoId: 2, cantidad: 2, precioUnitario: 25.75 },
+        { productoId: 2, cantidad: 3, precioUnitario: 30.10 },
+        { productoId: 1, cantidad: 4, precioUnitario: 20.40 }
+      ]
+    };
+
+    // Crear las ventas
+    await Promise.all([
+      crearVentaConDetalles(venta1),
+      crearVentaConDetalles(venta2),
+      crearVentaConDetalles(venta3),
+      crearVentaConDetalles(venta4),
+      crearVentaConDetalles(venta5)
+    ]);
+
+    // Actualizar la lista de ventas
+    await fetchVentas();
+    
+    alert('Ventas de prueba creadas exitosamente!');
+  } catch (error) {
+    console.error('Error al crear ventas de prueba:', error);
+    setError('Error al crear ventas de prueba: ' + error.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
+const crearVentaConDetalles = async (venta) => {
+  // Primero creamos la venta
+  const response = await fetch('http://localhost:8080/ventas', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      fecha: venta.fecha,
+      clienteId: venta.clienteId,
+      usuarioId: venta.usuarioId
+    })
+  });
+
+  if (!response.ok) throw new Error('Error al crear venta');
+
+  const createdVenta = await response.json();
+  
+  // Luego agregamos los detalles
+  for (const detalle of venta.detalles) {
+    const detalleResponse = await fetch(`http://localhost:8080/ventas/${createdVenta.id}/detalles`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(detalle)
+    });
+
+    if (!detalleResponse.ok) throw new Error('Error al crear detalle de venta');
+  }
+};
 // =============================================
 // FUNCIONES PARA CLIENTES
 // =============================================
@@ -869,27 +1192,49 @@ const handleAuditoriaFiltroChange = (e) => {
        
       {/* Dashboard Section */}
       {activeSection === 'Dashboard' && (
-        <div className={styles.dashboard}>
-          <h2>Bienvenido/a</h2>
-          <div className={styles.statsGrid}>
-            <div className={styles.statCard}>
-              <h3>Gráfico Ventas</h3>
-              <p>Últimos 30 días</p>
-            </div>
-            <div className={styles.statCard}>
-              <h3>Productos Top</h3>
-              <p>Más vendidos</p>
-            </div>
-            <div className={styles.statCard}>
-              <h3>Últimas Órdenes</h3>
-              <p>Tablas</p>
-            </div>
-            <div className={styles.statCard}>
-              <h3>Alertas Pendientes</h3>
-              <p>Tablas</p>
+          <div className={styles.dashboard}>
+            <h2>Bienvenido/a</h2>
+            <div className={styles.statsGrid}>
+              {/* Tarjeta para Gráfico de Ventas */}
+              {/* MODIFICAR ESTA TARJETA */}
+              <div className={styles.statCard} onClick={() => handleExpandChart('ventas')}> {/* <--- AGREGADO onClick */}
+                <h3>Gráfico Ventas</h3>
+                <p>Últimos 30 días</p>
+                <div className={styles.miniChartWrapper}> {/* <--- AGREGADO: Contenedor para el mini gráfico */}
+                  <GraficoVentas isMini={true} /> {/* <--- MODIFICADO: Renderiza la versión mini */}
+                </div>
+              </div>
+
+              {/* Tarjeta para Productos Top */}
+              {/* AGREGAR ESTA NUEVA TARJETA */}
+              <div className={styles.statCard} onClick={() => handleExpandChart('productosTop')}> {/* <--- AGREGADO onClick */}
+                <h3>Productos Top</h3>
+                <p>Más vendidos</p>
+                <div className={styles.miniChartWrapper}> {/* <--- AGREGADO: Contenedor para el mini gráfico */}
+                  <GraficoProductosTop isMini={true} /> {/* <--- AGREGADO: Renderiza la versión mini */}
+                </div>
+              </div>
+               {/* Modal/Overlay para el gráfico expandido */}
+        {/* AGREGAR ESTE BLOQUE CONDICIONAL PARA EL MODAL */}
+        {expandedChartType && (
+          <ChartModal onClose={handleCloseExpandedChart}>
+            {expandedChartType === 'ventas' && <GraficoVentas isMini={false} />}
+            {expandedChartType === 'productosTop' && <GraficoProductosTop isMini={false} />}
+          </ChartModal>
+        )}
+
+              {/* Otras tarjetas del dashboard se mantienen */}
+              <div className={styles.statCard}>
+                <h3>Últimas Órdenes</h3>
+                <p>Tablas</p>
+              </div>
+              <div className={styles.statCard}>
+                <h3>Alertas Pendientes</h3>
+                <p>Tablas</p>
+              </div>
             </div>
           </div>
-        </div>)}
+        )}
 
       {/* Productos Section */}
       {activeSection === 'Productos' && (
@@ -1461,7 +1806,18 @@ const handleAuditoriaFiltroChange = (e) => {
         </div>
       )}
     </div>
-
+{activeSection === 'Ventas' && (
+  <div className={styles.ventasContainer}>
+    <div className={styles.ventasHeader}>
+      <h1><FaShoppingCart /> Ventas</h1>
+      <div className={styles.ventasHeaderButtons}>
+        <button onClick={() => setShowVentaModal(true)} className={styles.nuevoVentaBtn}><FaPlus /> NUEVA VENTA</button>
+        <button onClick={generarVentasDePrueba} className={styles.ventasPruebaBtn}><FaPlus /> GENERAR VENTAS DE PRUEBA</button>
+      </div>
+    </div>
+    {/* ... resto del código ... */}
+  </div>
+)}
     {/* Modal Nueva Venta */}
     {showVentaModal && (
       <div className={styles.modalOverlay}>
