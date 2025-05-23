@@ -21,4 +21,6 @@ import edu.unimag.entities.Producto;
 
 public interface ProductoRepository extends JpaRepository<Producto, Long>{
 
+    List<Producto> findByStockLessThan(int stock);
+
 }

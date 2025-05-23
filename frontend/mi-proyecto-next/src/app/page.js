@@ -278,8 +278,12 @@ const GraficoProductosTop = ({ isMini = false }) => {
     </div>
   );
 };
-export default function Home() {
 
+
+export default function Home() {
+  // Agrega este estado para las alertas de stock
+  const [alertasStock, setAlertasStock] = useState([]);
+  const [showAlertaStock, setShowAlertaStock] = useState(false);
   // =============================================
   // ESTADOS
   // =============================================
@@ -291,6 +295,10 @@ export default function Home() {
     setSidebarCollapsed(!sidebarCollapsed);
   };
 
+  const handleEditVentaClick = (venta) => {
+  setEditingVenta({...venta});
+  setShowEditVentaModal(true);
+};
   // AGREGAR ESTAS DOS FUNCIONES
   const handleExpandChart = (chartType) => {
     setExpandedChartType(chartType);
@@ -424,8 +432,10 @@ export default function Home() {
   useEffect(() => {
   if (activeSection === 'Ventas') {
     fetchVentas();
+    fetchClientesDisponibles();
+    fetchProductosDisponibles();
   }
-  }, [activeSection]);
+}, [activeSection]);
   // =============================================
   // FUNCIONES GENERALES
   // =============================================
@@ -766,98 +776,66 @@ const handleEditProveedorInputChange = (e) => {
 // FUNCIONES PARA VENTAS
 // =============================================
 
+const [clientesDisponibles, setClientesDisponibles] = useState([]);
+const [productosDisponibles, setProductosDisponibles] = useState([]);
+
+const fetchClientesDisponibles = async () => {
+  try {
+    const response = await fetch('http://localhost:8080/clientes');
+    const data = await response.json();
+    setClientesDisponibles(Array.isArray(data) ? data : [data]);
+  } catch (err) {
+    console.error('Error fetching clientes:', err);
+  }
+};
+
+const fetchProductosDisponibles = async () => {
+  try {
+    const response = await fetch('http://localhost:8080/productos');
+    const data = await response.json();
+    setProductosDisponibles(Array.isArray(data) ? data : [data]);
+  } catch (err) {
+    console.error('Error fetching productos:', err);
+  }
+};
+
 const fetchVentas = async () => {
   setLoading(true);
   setError(null);
   try {
     const response = await fetch('http://localhost:8080/ventas');
     if (!response.ok) throw new Error('Error al cargar ventas');
-    const data = await response.json();
-    setVentas(Array.isArray(data) ? data : [data]);
+    const ventasData = await response.json();
+    
+    // Obtener clientes y usuarios para mapear los nombres
+    const clientesResponse = await fetch('http://localhost:8080/clientes');
+    const clientesData = await clientesResponse.json();
+    const usuariosResponse = await fetch('http://localhost:8080/usuarios');
+    const usuariosData = await usuariosResponse.json();
+    
+    // Mapear las ventas con los nombres correspondientes
+    const ventasConNombres = ventasData.map(venta => {
+      const cliente = Array.isArray(clientesData) 
+        ? clientesData.find(c => c.id === venta.clienteId)
+        : clientesData.id === venta.clienteId ? clientesData : null;
+      
+      const usuario = Array.isArray(usuariosData)
+        ? usuariosData.find(u => u.id === venta.usuarioId)
+        : usuariosData.id === venta.usuarioId ? usuariosData : null;
+      
+      return {
+        ...venta,
+        clienteNombre: cliente ? cliente.nombre : 'Desconocido',
+        usuarioNombre: usuario ? usuario.nombre : 'Desconocido'
+      };
+    });
+    
+    setVentas(ventasConNombres);
   } catch (err) {
     setError(err.message);
     console.error('Error:', err);
   } finally {
     setLoading(false);
-  }
-};
-
-const handleVentaSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    const response = await fetch('http://localhost:8080/ventas', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(nuevaVenta),
-    });
-
-    if (!response.ok) throw new Error('Error al crear venta');
-
-    const createdVenta = await response.json();
-    
-    // Agregar detalles si existen
-    if (nuevaVenta.detalles.length > 0) {
-      for (const detalle of nuevaVenta.detalles) {
-        await fetch(`http://localhost:8080/ventas/${createdVenta.id}/detalles`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(detalle),
-        });
-      }
-    }
-
-    setShowVentaModal(false);
-    setNuevaVenta({
-      fecha: 2025-12-10,
-      clienteId: 1,
-      usuarioId: 1,
-      detalles: []
-    });
-    await fetchVentas();
-  } catch (err) {
-    setError(err.message);
-    console.error('Error:', err);
-  }
-};
-
-const handleDeleteVenta = async (id) => {
-  if (window.confirm('¿Estás seguro de que deseas eliminar esta venta?')) {
-    try {
-      const response = await fetch(`http://localhost:8080/ventas/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) throw new Error('Error al eliminar venta');
-      await fetchVentas();
-    } catch (err) {
-      setError(err.message);
-      console.error('Error:', err);
-    }
-  }
-};
-
-const handleEditVentaClick = (venta) => {
-  setEditingVenta(venta);
-  setShowEditVentaModal(true);
-};
-
-const handleEditVentaSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    const response = await fetch(`http://localhost:8080/ventas/${editingVenta.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(editingVenta),
-    });
-
-    if (!response.ok) throw new Error('Error al actualizar venta');
-
-    setShowEditVentaModal(false);
-    setEditingVenta(null);
-    await fetchVentas();
-  } catch (err) {
-    setError(err.message);
-    console.error('Error:', err);
   }
 };
 
@@ -904,15 +882,25 @@ const handleAddDetalle = () => {
 
 const handleDetalleInputChange = (e) => {
   const { name, value } = e.target;
-  setNuevoDetalle({
-    ...nuevoDetalle,
-    [name]: name === 'productoId' || name === 'cantidad' ? parseInt(value) : 
-            name === 'precioUnitario' ? parseFloat(value) : value
-  });
+  
+  // Si cambia el producto, actualizar el precio automáticamente
+  if (name === 'productoId') {
+    const productoSeleccionado = productosDisponibles.find(p => p.id === parseInt(value));
+    setNuevoDetalle({
+      ...nuevoDetalle,
+      productoId: parseInt(value),
+      precioUnitario: productoSeleccionado ? productoSeleccionado.precio : 0
+    });
+  } else {
+    setNuevoDetalle({
+      ...nuevoDetalle,
+      [name]: name === 'cantidad' ? parseInt(value) : parseFloat(value)
+    });
+  }
 };
 
 const generarVentasDePrueba = async () => {
-  if (!window.confirm('¿Desea generar ventas de prueba? Esto creará 2 ventas con 3 productos cada una.')) {
+  if (!window.confirm('¿Desea generar ventas de prueba? Esto creará 2 ventas.')) {
     return;
   }
 
@@ -925,9 +913,9 @@ const generarVentasDePrueba = async () => {
       clienteId: 1,
       usuarioId: 1,
       detalles: [
-        { productoId: 1, cantidad: 2, precioUnitario: 10.50 },
-        { productoId: 2, cantidad: 1, precioUnitario: 25.75 },
-        { productoId: 3, cantidad: 3, precioUnitario: 5.20 }
+        { productoId: 1, cantidad: 2, precioUnitario: 2000 },
+        { productoId: 2, cantidad: 1, precioUnitario: 5000 },
+        { productoId: 3, cantidad: 3, precioUnitario: 3500 }
       ]
     };
     const venta2 = {
@@ -935,9 +923,10 @@ const generarVentasDePrueba = async () => {
       clienteId: 2,
       usuarioId: 1,
       detalles: [
-        { productoId: 2, cantidad: 2, precioUnitario: 25.75 },
-        { productoId: 4, cantidad: 1, precioUnitario: 15.30 },
-        { productoId: 1, cantidad: 2, precioUnitario: 10.40 }
+        { productoId: 2, cantidad: 2, precioUnitario: 1500 },
+        { productoId: 4, cantidad: 1, precioUnitario: 3000 },
+        { productoId: 1, cantidad: 2, precioUnitario: 5500 },
+        { productoId: 1, cantidad: 2, precioUnitario: 3200 }
       ]
     };
     const venta3 = {
@@ -945,39 +934,16 @@ const generarVentasDePrueba = async () => {
       clienteId: 2,
       usuarioId: 1,
       detalles: [
-        { productoId: 2, cantidad: 2, precioUnitario: 25.75 },
-        { productoId: 4, cantidad: 1, precioUnitario: 15.30 },
-        { productoId: 2, cantidad: 3, precioUnitario: 40.40 }
+        { productoId: 2, cantidad: 2, precioUnitario: 4500 },
+        { productoId: 4, cantidad: 1, precioUnitario: 6000 }
       ]
     };
-    const venta4 = {
-      fecha: new Date(Date.now() - 86400000).toISOString().split('T')[0], // Ayer
-      clienteId: 2,
-      usuarioId: 1,
-      detalles: [
-        { productoId: 2, cantidad: 2, precioUnitario: 25.75 },
-        { productoId: 3, cantidad: 4, precioUnitario: 20.30 },
-        { productoId: 5, cantidad: 4, precioUnitario: 8.40 }
-      ]
-    };
-    const venta5 = {
-      fecha: new Date(Date.now() - 86400000).toISOString().split('T')[0], // Ayer
-      clienteId: 2,
-      usuarioId: 1,
-      detalles: [
-        { productoId: 2, cantidad: 2, precioUnitario: 25.75 },
-        { productoId: 2, cantidad: 3, precioUnitario: 30.10 },
-        { productoId: 1, cantidad: 4, precioUnitario: 20.40 }
-      ]
-    };
-
+  
     // Crear las ventas
     await Promise.all([
       crearVentaConDetalles(venta1),
       crearVentaConDetalles(venta2),
-      crearVentaConDetalles(venta3),
-      crearVentaConDetalles(venta4),
-      crearVentaConDetalles(venta5)
+      crearVentaConDetalles(venta3)
     ]);
 
     // Actualizar la lista de ventas
@@ -992,31 +958,159 @@ const generarVentasDePrueba = async () => {
   }
 };
 
-const crearVentaConDetalles = async (venta) => {
-  // Primero creamos la venta
-  const response = await fetch('http://localhost:8080/ventas', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      fecha: venta.fecha,
-      clienteId: venta.clienteId,
-      usuarioId: venta.usuarioId
-    })
-  });
+const handleVentaSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    // Validar que haya al menos un detalle
+    if (nuevaVenta.detalles.length === 0) {
+      alert('Debe agregar al menos un detalle a la venta');
+      return;
+    }
 
-  if (!response.ok) throw new Error('Error al crear venta');
-
-  const createdVenta = await response.json();
-  
-  // Luego agregamos los detalles
-  for (const detalle of venta.detalles) {
-    const detalleResponse = await fetch(`http://localhost:8080/ventas/${createdVenta.id}/detalles`, {
+    // Crear la venta principal
+    const ventaResponse = await fetch('http://localhost:8080/ventas', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(detalle)
+      body: JSON.stringify({
+        fecha: nuevaVenta.fecha,
+        clienteId: nuevaVenta.clienteId,
+        usuarioId: nuevaVenta.usuarioId
+      })
     });
 
-    if (!detalleResponse.ok) throw new Error('Error al crear detalle de venta');
+    if (!ventaResponse.ok) throw new Error('Error al crear venta');
+
+    const createdVenta = await ventaResponse.json();
+
+    // Crear los detalles de la venta
+    for (const detalle of nuevaVenta.detalles) {
+      const detalleResponse = await fetch(`http://localhost:8080/ventas/${createdVenta.id}/detalles`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(detalle)
+      });
+
+      if (!detalleResponse.ok) throw new Error('Error al crear detalle de venta');
+    }
+
+    // Limpiar el formulario y actualizar la lista
+    setNuevaVenta({
+      fecha: new Date().toISOString().split('T')[0],
+      clienteId: 1,
+      usuarioId: 1,
+      detalles: []
+    });
+    setNuevoDetalle({
+      productoId: 1,
+      cantidad: 1,
+      precioUnitario: 0
+    });
+    setShowVentaModal(false);
+    await fetchVentas();
+    alert('Venta creada exitosamente!');
+
+  } catch (err) {
+    console.error('Error al crear venta:', err);
+    setError(err.message);
+    alert('Error al crear venta: ' + err.message);
+  }
+};
+
+const handleRemoveDetalle = (indexToRemove) => {
+  setNuevaVenta(prev => ({
+    ...prev,
+    detalles: prev.detalles.filter((_, index) => index !== indexToRemove)
+  }));
+};
+
+const handleDeleteVenta = async (id) => {
+  if (window.confirm('¿Estás seguro de eliminar esta venta y todos sus detalles?')) {
+    try {
+      // Primero eliminar los detalles
+      const detallesResponse = await fetch(`http://localhost:8080/ventas/${id}/detalles`);
+      if (detallesResponse.ok) {
+        const detalles = await detallesResponse.json();
+        for (const detalle of detalles) {
+          await fetch(`http://localhost:8080/ventas/${id}/detalles/${detalle.id}`, {
+            method: 'DELETE'
+          });
+        }
+      }
+      
+      // Luego eliminar la venta
+      const response = await fetch(`http://localhost:8080/ventas/${id}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) throw new Error('Error al eliminar venta');
+      
+      // Actualizar lista
+      await fetchVentas();
+      alert('Venta eliminada correctamente');
+    } catch (err) {
+      setError(err.message);
+      console.error('Error:', err);
+      alert('Error al eliminar venta: ' + err.message);
+    }
+  }
+};
+const handleEditVentaSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const response = await fetch(`http://localhost:8080/ventas/${editingVenta.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fecha: editingVenta.fecha,
+        clienteId: editingVenta.clienteId,
+        usuarioId: editingVenta.usuarioId
+      })
+    });
+
+    if (!response.ok) throw new Error('Error al actualizar venta');
+
+    setShowEditVentaModal(false);
+    setEditingVenta(null);
+    await fetchVentas();
+    alert('Venta actualizada correctamente');
+  } catch (err) {
+    setError(err.message);
+    console.error('Error:', err);
+    alert('Error al actualizar venta: ' + err.message);
+  }
+};
+const crearVentaConDetalles = async (venta) => {
+  try {
+    // Primero creamos la venta
+    const ventaResponse = await fetch('http://localhost:8080/ventas', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fecha: venta.fecha,
+        clienteId: venta.clienteId,
+        usuarioId: venta.usuarioId
+      })
+    });
+
+    if (!ventaResponse.ok) throw new Error('Error al crear venta');
+
+    const createdVenta = await ventaResponse.json();
+    
+    // Luego agregamos los detalles
+    for (const detalle of venta.detalles) {
+      const detalleResponse = await fetch(`http://localhost:8080/ventas/${createdVenta.id}/detalles`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(detalle)
+      });
+
+      if (!detalleResponse.ok) throw new Error('Error al crear detalle de venta');
+    }
+
+    return createdVenta;
+  } catch (err) {
+    console.error('Error en crearVentaConDetalles:', err);
+    throw err;
   }
 };
 // =============================================
@@ -1157,6 +1251,60 @@ const handleAuditoriaFiltroChange = (e) => {
   });
 };
 
+// Agrega este efecto para cargar las alertas
+useEffect(() => {
+  if (activeSection === 'Dashboard') {
+    fetchAlertasStock();
+  }
+}, [activeSection]);
+
+// Función para obtener productos con stock bajo
+const fetchAlertasStock = async () => {
+  try {
+    const response = await axios.get('http://localhost:8080/productos/bajo-stock');
+    setAlertasStock(response.data);
+  } catch (err) {
+    console.error('Error fetching alertas de stock:', err);
+  }
+};
+
+// Componente para la tarjeta de alertas de stock
+const AlertaStockCard = ({ isMini = false }) => {
+  if (isMini) {
+    return (
+      <div className={styles.alertBadge}>
+        {alertasStock.length > 0 && (
+          <span className={styles.alertCount}>{alertasStock.length}</span>
+        )}
+      </div>
+    );
+  }
+  return (
+    <div className={styles.alertTable}>
+      <h3>Productos con stock bajo</h3>
+      {alertasStock.length === 0 ? (
+        <p>No hay productos con stock bajo</p>
+      ) : (
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Stock</th>
+            </tr>
+          </thead>
+          <tbody>
+            {alertasStock.map(producto => (
+              <tr key={producto.id}>
+                <td>{producto.nombre}</td>
+                <td className={styles.lowStock}>{producto.stock} unidades</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+};
 // =============================================
 // RENDERIZADO
 // =============================================
@@ -1196,7 +1344,6 @@ const handleAuditoriaFiltroChange = (e) => {
             <h2>Bienvenido/a</h2>
             <div className={styles.statsGrid}>
               {/* Tarjeta para Gráfico de Ventas */}
-              {/* MODIFICAR ESTA TARJETA */}
               <div className={styles.statCard} onClick={() => handleExpandChart('ventas')}> {/* <--- AGREGADO onClick */}
                 <h3>Gráfico Ventas</h3>
                 <p>Últimos 30 días</p>
@@ -1206,7 +1353,6 @@ const handleAuditoriaFiltroChange = (e) => {
               </div>
 
               {/* Tarjeta para Productos Top */}
-              {/* AGREGAR ESTA NUEVA TARJETA */}
               <div className={styles.statCard} onClick={() => handleExpandChart('productosTop')}> {/* <--- AGREGADO onClick */}
                 <h3>Productos Top</h3>
                 <p>Más vendidos</p>
@@ -1214,12 +1360,22 @@ const handleAuditoriaFiltroChange = (e) => {
                   <GraficoProductosTop isMini={true} /> {/* <--- AGREGADO: Renderiza la versión mini */}
                 </div>
               </div>
+              {/* Tarjeta para Alertas de Stock */}
+      <div className={styles.statCard} onClick={() => handleExpandChart('alertasStock')}>
+        <h3>Alertas de Stock</h3>
+        <p>Productos con bajo inventario</p>
+        <div className={styles.miniChartWrapper}>
+          <AlertaStockCard isMini={true} />
+        </div>
+      </div>
                {/* Modal/Overlay para el gráfico expandido */}
         {/* AGREGAR ESTE BLOQUE CONDICIONAL PARA EL MODAL */}
         {expandedChartType && (
           <ChartModal onClose={handleCloseExpandedChart}>
             {expandedChartType === 'ventas' && <GraficoVentas isMini={false} />}
             {expandedChartType === 'productosTop' && <GraficoProductosTop isMini={false} />}
+            {expandedChartType === 'alertasStock' && <AlertaStockCard isMini={false} />}
+
           </ChartModal>
         )}
 
@@ -1426,7 +1582,7 @@ const handleAuditoriaFiltroChange = (e) => {
                 </form>
             </div>
           </div>)}
-        </div>)}
+      </div>)}
 
       {activeSection === 'Usuarios' && (
        <div className={styles.usuariosContainer}>
@@ -1768,41 +1924,50 @@ const handleAuditoriaFiltroChange = (e) => {
       ) : (
         <div className={styles.tableWrapper}>
           <table className={styles.ventasTable}>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Fecha</th>
-                <th>Cliente ID</th>
-                <th>Usuario ID</th>
-                <th>Total</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ventas.slice(0, itemsPerPage).map((venta, index) => (
-                <tr key={venta.id}>
-                  <td>{index + 1}</td>
-                  <td>{new Date(venta.fecha).toLocaleDateString('es-ES')}</td>
-                  <td>{venta.clienteId}</td>
-                  <td>{venta.usuarioId}</td>
-                  <td>${venta.total?.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) || '0.00'}</td>
-                  <td>
-                    <div className={styles.actions}>
-                      <button className={`${styles.actionBtn} ${styles.infoBtn}`} title="Ver detalles" onClick={() => fetchDetallesVenta(venta.id)}>
-                        <FaSearch />
-                      </button>
-                      <button className={`${styles.actionBtn} ${styles.editBtn}`} title="Editar" onClick={() => handleEditVentaClick(venta)}>
-                        <FaEdit />
-                      </button>
-                      <button className={`${styles.actionBtn} ${styles.deleteBtn}`} title="Eliminar" onClick={() => handleDeleteVenta(venta.id)}>
-                        <FaTrash />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Fecha</th>
+      <th>Cliente</th>
+      <th>Usuario</th>
+      <th>Total</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {ventas.slice(0, itemsPerPage).map((venta, index) => (
+      <tr key={venta.id}>
+        <td>{index + 1}</td>
+        <td>{new Date(venta.fecha).toLocaleDateString('es-ES')}</td>
+        <td>{venta.clienteNombre}</td>
+        <td>{venta.usuarioNombre}</td>
+        <td>${venta.total?.toLocaleString('es-ES', {
+          minimumFractionDigits: 2, 
+          maximumFractionDigits: 2
+        }) || '0.00'}</td>
+        <td>
+          <div className={styles.actions}>
+            <button className={`${styles.actionBtn} ${styles.infoBtn}`} 
+                    title="Ver detalles" 
+                    onClick={() => fetchDetallesVenta(venta.id)}>
+              <FaSearch />
+            </button>
+            <button className={`${styles.actionBtn} ${styles.editBtn}`} 
+                    title="Editar" 
+                    onClick={() => handleEditVentaClick(venta)}>
+              <FaEdit />
+            </button>
+            <button className={`${styles.actionBtn} ${styles.deleteBtn}`} 
+                    title="Eliminar" 
+                    onClick={() => handleDeleteVenta(venta.id)}>
+              <FaTrash />
+            </button>
+          </div>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
         </div>
       )}
     </div>
@@ -1818,73 +1983,122 @@ const handleAuditoriaFiltroChange = (e) => {
     {/* ... resto del código ... */}
   </div>
 )}
-    {/* Modal Nueva Venta */}
-    {showVentaModal && (
-      <div className={styles.modalOverlay}>
-        <div className={styles.modalContent}>
-          <h2>Nueva Venta</h2>
-          <form onSubmit={handleVentaSubmit} className={styles.modalForm}>
-            <fieldset className={styles.formFieldset}>
-              <legend className={styles.formLegend}>Información de la Venta</legend>
-              <div className={styles.formGroup}>
-                <label>Fecha:</label>
-                <input type="date" name="fecha" value={nuevaVenta.fecha} onChange={handleVentaInputChange} required />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Cliente ID:</label>
-                <input type="number" name="clienteId" value={nuevaVenta.clienteId} onChange={handleVentaInputChange} min="1" required />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Usuario ID:</label>
-                <input type="number" name="usuarioId" value={nuevaVenta.usuarioId} onChange={handleVentaInputChange} min="1" required />
-              </div>
-            </fieldset>
 
-            <fieldset className={styles.formFieldset}>
-              <legend className={styles.formLegend}>Detalles de la Venta</legend>
-              <div className={styles.formGroup}>
-                <label>Producto ID:</label>
-                <input type="number" name="productoId" value={nuevoDetalle.productoId} onChange={handleDetalleInputChange} min="1" required />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Cantidad:</label>
-                <input type="number" name="cantidad" value={nuevoDetalle.cantidad} onChange={handleDetalleInputChange} min="1" required />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Precio Unitario:</label>
-                <input type="number" name="precioUnitario" value={nuevoDetalle.precioUnitario} onChange={handleDetalleInputChange} step="0.01" min="0" required />
-              </div>
-              <button type="button" onClick={handleAddDetalle} className={styles.addButton}>
-                Agregar Detalle
-              </button>
-              
-              {nuevaVenta.detalles.length > 0 && (
-                <div className={styles.detallesList}>
-                  <h4>Detalles agregados:</h4>
-                  <ul>
-                    {nuevaVenta.detalles.map((detalle, index) => (
-                      <li key={index}>
-                        Producto: {detalle.productoId}, Cantidad: {detalle.cantidad}, Precio: ${detalle.precioUnitario}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </fieldset>
+{showVentaModal && (
+  <div className={styles.modalOverlay}>
+    <div className={styles.modalContent}>
+      <h2>Nueva Venta</h2>
+      <form onSubmit={handleVentaSubmit} className={styles.modalForm}>
+        <fieldset className={styles.formFieldset}>
+          <legend className={styles.formLegend}>Información de la Venta</legend>
+          <div className={styles.formGroup}>
+            <label>Fecha:</label>
+            <input type="date" name="fecha" value={nuevaVenta.fecha} onChange={handleVentaInputChange} required />
+          </div>
+          <div className={styles.formGroup}>
+            <label>Cliente:</label>
+            <select name="clienteId" value={nuevaVenta.clienteId} onChange={handleVentaInputChange} required>
+              <option value="">Seleccione un cliente</option>
+              {clientesDisponibles.map(cliente => (
+                <option key={cliente.id} value={cliente.id}>
+                  {cliente.nombre} (ID: {cliente.id})
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className={styles.formGroup}>
+            <label>Usuario:</label>
+            <input type="number" name="usuarioId" value={nuevaVenta.usuarioId} onChange={handleVentaInputChange} min="1" required />
+          </div>
+        </fieldset>
 
-            <div className={styles.modalButtons}>
-              <button type="button" onClick={() => setShowVentaModal(false)} className={styles.cancelButton}>
-                Cancelar
-              </button>
-              <button type="submit" className={styles.submitButton}>
-                Guardar Venta
-              </button>
+        <fieldset className={styles.formFieldset}>
+          <legend className={styles.formLegend}>Detalles de la Venta</legend>
+          <div className={styles.formGroup}>
+            <label>Producto:</label>
+            <select name="productoId" value={nuevoDetalle.productoId} onChange={handleDetalleInputChange} required>
+              <option value="">Seleccione un producto</option>
+              {productosDisponibles.map(producto => (
+                <option key={producto.id} value={producto.id}>
+                  {producto.nombre} - ${producto.precio.toFixed(2)}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className={styles.formGroup}>
+            <label>Cantidad:</label>
+            <input 
+              type="number" 
+              name="cantidad" 
+              value={nuevoDetalle.cantidad} 
+              onChange={handleDetalleInputChange} 
+              min="1" 
+              required 
+            />
+          </div>
+          <div className={styles.formGroup}>
+            <label>Precio Unitario:</label>
+            <input 
+              type="number" 
+              name="precioUnitario" 
+              value={nuevoDetalle.precioUnitario} 
+              onChange={handleDetalleInputChange} 
+              step="0.01" 
+              min="0" 
+              required 
+              readOnly // Hacer el campo de solo lectura ya que se autocompleta
+            />
+          </div>
+          <button type="button" onClick={handleAddDetalle} className={styles.addButton}>
+            Agregar Detalle
+          </button>
+          
+          {nuevaVenta.detalles.length > 0 && (
+            <div className={styles.detallesList}>
+              <h4>Detalles agregados:</h4>
+              <ul>
+                {nuevaVenta.detalles.map((detalle, index) => {
+                  const producto = productosDisponibles.find(p => p.id === detalle.productoId);
+                  return (
+                    <li key={index} className={styles.detalleItem}>
+            <div>
+              <span>Producto: {producto ? producto.nombre : detalle.productoId}, </span>
+              <span>Cantidad: {detalle.cantidad}, </span>
+              <span>Precio: ${detalle.precioUnitario.toFixed(2)}, </span>
+              <span>Subtotal: ${(detalle.cantidad * detalle.precioUnitario).toFixed(2)}</span>
             </div>
-          </form>
-        </div>
-      </div>
-    )}
+            <button 
+              type="button" 
+              onClick={() => handleRemoveDetalle(index)}
+              className={styles.deleteDetalleBtn}
+            >
+              <FaTrash /> Eliminar
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+              <div className={styles.totalVenta}>
+                <strong>Total: ${
+                  nuevaVenta.detalles.reduce((sum, detalle) => sum + (detalle.cantidad * detalle.precioUnitario), 0).toFixed(2)
+                }</strong>
+              </div>
+            </div>
+          )}
+        </fieldset>
 
+        <div className={styles.modalButtons}>
+          <button type="button" onClick={() => setShowVentaModal(false)} className={styles.cancelButton}>
+            Cancelar
+          </button>
+          <button type="submit" className={styles.submitButton} disabled={nuevaVenta.detalles.length === 0}>
+  Guardar Venta
+</button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
     {/* Modal Editar Venta */}
     {showEditVentaModal && editingVenta && (
       <div className={styles.modalOverlay}>

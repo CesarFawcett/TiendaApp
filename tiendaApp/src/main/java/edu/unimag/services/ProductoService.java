@@ -13,4 +13,5 @@ public interface ProductoService {
     Producto update(Long id, Producto newProducto);
     void delete(Long id);
     List<ProductoMasVendidoDto> findTopSellingProducts(int i);
+    List<Producto> findByStockLessThan(int stock);
 }

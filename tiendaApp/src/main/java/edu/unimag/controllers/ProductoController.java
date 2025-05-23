@@ -144,4 +144,10 @@ public class ProductoController {
         List<ProductoMasVendidoDto> topProducts = productoService.findTopSellingProducts(5); // <-- Obtiene los 5 más vendidos
         return ResponseEntity.ok(topProducts);
     }
+
+    @GetMapping("/bajo-stock")
+    public ResponseEntity<List<ProductoDto>> getProductosBajoStock() {
+    List<Producto> productos = productoService.findByStockLessThan(10); // Define este método en tu servicio
+    return ResponseEntity.ok(productoMapper.toDtoList(productos));
+}
 }

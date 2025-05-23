@@ -1194,3 +1194,118 @@
     text-align: center;
     margin-top: 10px;
 }
+
+
+
+/* Estilos para la lista de detalles */
+.detallesList {
+  margin-top: 15px;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+.detallesList ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.detallesList li {
+  padding: 5px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.totalVenta {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 2px solid #333;
+  text-align: right;
+}
+
+/* Alertas */
+.alertBadge {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.alertCount {
+  background-color: #ff4444;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.lowStock {
+  color: #ff4444;
+  font-weight: bold;
+}
+
+.alertTable {
+  width: 100%;
+}
+
+.alertTable table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.alertTable th, .alertTable td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.alertTable th {
+  background-color: #f5f5f5;
+}
+
+/* Mini tablas */
+.miniTableWrapper {
+  height: 100px;
+  overflow: hidden;
+}
+
+.miniTableWrapper table {
+  font-size: 0.8rem;
+}
+
+.miniTableWrapper th, .miniTableWrapper td {
+  padding: 4px;
+}
+
+/* Estilos para la lista de detalles */
+.detalleItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.detalleItem:hover {
+  background-color: #f9f9f9;
+}
+
+.deleteDetalleBtn {
+  background-color: #ff4444;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.deleteDetalleBtn:hover {
+  background-color: #cc0000;
+}

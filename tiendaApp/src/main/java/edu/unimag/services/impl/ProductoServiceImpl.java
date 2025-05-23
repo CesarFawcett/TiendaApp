@@ -73,6 +73,11 @@ public class ProductoServiceImpl implements ProductoService {
                 .setMaxResults(limit)
                 .getResultList();
     }
+
+    @Override
+    public List<Producto> findByStockLessThan(int stock) {
+      return productoRepository.findByStockLessThan(stock);
+    }
     
     
 }
